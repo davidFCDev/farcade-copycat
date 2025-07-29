@@ -27,10 +27,37 @@
       .crisp {
         image-rendering: auto;
       }
+
+      /* Canvas styles */
+      canvas {
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+
+      /* HUD Styles - Simple text row without background */
+      #gameHUD {
+        position: fixed;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        z-index: 1000;
+      }
+
+      #hudCanvas {
+        display: block;
+        background: transparent;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@farcade/game-sdk@latest/dist/index.min.js"></script>
   </head>
   <body>
+    <!-- Game HUD - Score and Timer in column without background -->
+    <div id="gameHUD">
+      <canvas id="hudCanvas" width="800" height="200"></canvas>
+    </div>
+
     <script src="https://codepen.io/Gthibaud/pen/dybzvNw.js"></script>
     <script>
       // ----------
@@ -1066,7 +1093,7 @@
           {
             type: "img",
             name: "main_title",
-            path: "https://image.ibb.co/mrBLMo/main_title.png",
+            path: "https://i.postimg.cc/QM4sgtKG/opensea-title.png",
           },
           {
             type: "img",
@@ -1096,7 +1123,12 @@
           {
             type: "img",
             name: "pattern",
-            path: "https://image.ibb.co/cv02Z8/pattern.png",
+            path: "https://i.postimg.cc/wMk6nk4Z/water.png",
+          },
+          {
+            type: "img",
+            name: "menu_background",
+            path: "https://i.postimg.cc/nccy2ZZn/pngwing-com-12.png",
           },
           {
             type: "img",
@@ -1677,6 +1709,123 @@
           }
         }
       });
+
+      // ========== SCORE AND TIMER SYSTEM ==========
+      let gameScore = 0;
+      let levelTime = 30;
+      let timerInterval = null;
+      let showHUD_flag = false;
+      let hudCanvasCtx = null;
+      const BASE_POINTS_PER_LEVEL = 100;
+
+      function showHUD() {
+        showHUD_flag = true;
+        document.getElementById("gameHUD").style.display = "block";
+
+        // Initialize canvas context for HUD
+        if (!hudCanvasCtx) {
+          hudCanvasCtx = document.getElementById("hudCanvas").getContext("2d");
+          hudCanvasCtx.imageSmoothingEnabled = false;
+        }
+
+        updateHUD();
+      }
+
+      function hideHUD() {
+        showHUD_flag = false;
+        document.getElementById("gameHUD").style.display = "none";
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+      }
+
+      function updateScore() {
+        updateHUD();
+      }
+
+      function updateTimer() {
+        updateHUD();
+      }
+
+      function updateHUD() {
+        if (!hudCanvasCtx) return;
+
+        // Clear canvas - now wider to accommodate larger scores
+        hudCanvasCtx.clearRect(0, 0, 800, 200);
+
+        // Render Score and Timer in column - large scale with more spacing
+        let scoreText = "Score: " + gameScore;
+        let timerText = "Time: " + levelTime;
+        let timerColor = levelTime <= 10 ? 1 : 0;
+
+        // Position score on top, timer on bottom - centered horizontally in wider canvas
+        renderScaledTextOnCanvas(hudCanvasCtx, scoreText, 400, 60, 8, 0);
+        renderScaledTextOnCanvas(
+          hudCanvasCtx,
+          timerText,
+          400,
+          140,
+          8,
+          timerColor
+        );
+      }
+
+      function startLevelTimer(gameWorld) {
+        levelTime = 30;
+        updateHUD();
+
+        if (timerInterval) {
+          clearInterval(timerInterval);
+        }
+
+        timerInterval = setInterval(() => {
+          levelTime--;
+          updateHUD();
+
+          if (levelTime <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            // Game Over - Time's up
+            gameOverTimeUp(gameWorld);
+          }
+        }, 1000);
+      }
+
+      function calculateLevelScore(timeRemaining) {
+        // Base points multiplied by time remaining multiplier
+        // More time remaining = higher multiplier
+        let timeMultiplier = 1 + timeRemaining / 30; // 1x to 2x multiplier
+        return Math.floor(BASE_POINTS_PER_LEVEL * timeMultiplier);
+      }
+
+      function levelCompleted(gameWorld) {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        let levelPoints = calculateLevelScore(levelTime);
+        gameScore += levelPoints;
+        updateScore();
+
+        // Continue with normal level completion logic
+      }
+
+      function gameOverTimeUp(gameWorld) {
+        hideHUD();
+        // Trigger game over scene or restart level
+        gameWorld.startScene("levels");
+      }
+
+      function resetGame() {
+        gameScore = 0;
+        levelTime = 30;
+        updateScore();
+        updateTimer();
+      }
+      // ========== END SCORE AND TIMER SYSTEM ==========
+
       // menu scene
       let menu = new Scene("menu");
       menu.keyEvents = function (event) {
@@ -1690,7 +1839,7 @@
           this.world.assets.audio.selection.audio.play();
           this.selection -= 1;
         }
-        if (this.world.keys.KeyX) {
+        if (this.world.keys.Space) {
           this.world.assets.audio.selection.audio.play();
           this.world.startScene(this.button[this.selection].link);
         }
@@ -1751,7 +1900,30 @@
       };
       menu.render = function () {
         this.animatedBackground();
-        this.ctx.drawImage(this.world.assets.image["main_title"].image, 0, 0);
+        // Draw main title with high quality rendering
+        let titleImage = this.world.assets.image["main_title"].image;
+        let scaledWidth = titleImage.width / 2;
+        let scaledHeight = titleImage.height / 2;
+
+        // Save context and enable high quality image smoothing
+        this.ctx.save();
+        this.ctx.imageSmoothingEnabled = true;
+        this.ctx.imageSmoothingQuality = "high";
+
+        // Draw with precise positioning to avoid sub-pixel rendering
+        this.ctx.drawImage(
+          titleImage,
+          0,
+          0,
+          titleImage.width,
+          titleImage.height, // Source dimensions
+          Math.floor(0),
+          Math.floor(0), // Destination position (integer pixels)
+          Math.floor(scaledWidth),
+          Math.floor(scaledHeight) // Destination size (integer pixels)
+        );
+
+        this.ctx.restore();
         this.displaySelection();
         // notice
         this.world.ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -1764,23 +1936,43 @@
           "center"
         );
         this.world.write(
-          "[x] to Confirm",
+          "[Space] to Confirm",
           this.world.W / 2,
           this.world.H - 30,
           "center"
         );
       };
       menu.displaySelection = function () {
-        // display box
-        this.ctx.fillStyle = "#82769e";
-        this.world.drawBox(
-          "box",
-          this.select_pos.x - (this.texteMax + 60) / 2,
-          this.select_pos.y - 16,
-          this.texteMax + 60,
-          this.button.length * 20 + 20
+        // Display the custom menu background image
+        let menuImage = this.world.assets.image["menu_background"].image;
+
+        // Calculate appropriate size and position for the menu image
+        let menuWidth = menuImage.width / 2; // Scale down to half size for better fit
+        let menuHeight = menuImage.height / 2;
+        let menuX = (this.world.W - menuWidth) / 2; // Center horizontally
+        let menuY = this.select_pos.y - 40; // Position above the buttons
+
+        // Enable smooth rendering for the menu background
+        this.ctx.save();
+        this.ctx.imageSmoothingEnabled = true;
+        this.ctx.imageSmoothingQuality = "high";
+
+        // Draw the menu background image
+        this.ctx.drawImage(
+          menuImage,
+          0,
+          0,
+          menuImage.width,
+          menuImage.height, // Source
+          menuX,
+          menuY,
+          menuWidth,
+          menuHeight // Destination
         );
-        // display text and cursor
+
+        this.ctx.restore();
+
+        // Display the buttons text over the image
         for (i in this.button) {
           if (i == this.selection) {
             this.world.setFont("origami_light");
@@ -1795,6 +1987,8 @@
             "center"
           );
         }
+
+        // Display cursor
         this.cursor_phase += 0.1;
         if (this.cursor_phase > 1 / Math.sin(0.2)) {
           this.cursor_phase = -1;
@@ -1807,8 +2001,17 @@
         );
       };
       menu.animatedBackground = function () {
-        this.offset.x += 0.8;
-        this.offset.y += 0.6;
+        // Smooth ocean-like movement simulation
+        let time = Date.now() * 0.001; // Convert to seconds for smooth animation
+
+        // Create wave-like movement with multiple sine waves for more natural effect
+        this.offset.x += 0.3 + Math.sin(time * 0.5) * 0.2; // Base movement + wave variation
+        this.offset.y += 0.2 + Math.cos(time * 0.3) * 0.15; // Slower vertical movement
+
+        // Add a secondary wave for more complex movement
+        this.offset.x += Math.sin(time * 1.2) * 0.1;
+        this.offset.y += Math.cos(time * 0.8) * 0.1;
+
         if (this.offset.x > 63) {
           this.offset.x = 0;
         }
@@ -1855,7 +2058,7 @@
           this.world.assets.audio.selection.audio.play();
           this.selection -= 1;
         }
-        if (this.world.keys.KeyX) {
+        if (this.world.keys.Space) {
           this.world.assets.audio.selection.audio.play();
           this.world.current_level = this.selection + 1;
           this.world.startScene("inGame");
@@ -1921,7 +2124,7 @@
           "center"
         );
         this.world.write(
-          "[x] to Confirm, [E] to exit",
+          "[Space] to Confirm, [E] to exit",
           this.world.W / 2,
           this.world.H - 30,
           "center"
@@ -1934,6 +2137,7 @@
             0,
             Math.max(this.world.W / 2, this.world.H / 2),
             () => {
+              hideHUD();
               this.world.startScene("menu");
             }
           );
@@ -1952,6 +2156,12 @@
         this.won = false;
         this.userInput = true;
         this.world.initMap("map_" + this.world.current_level);
+
+        // Show HUD and start timer
+        showHUD();
+        updateScore();
+        startLevelTimer(this.world);
+
         this.cats = [];
         let spawn_cat = () => {
           // add cats on spawn tile_size
@@ -2073,7 +2283,84 @@
           this.transition.update();
           this.transition.render();
         }
+
+        // Update HUD if visible (now rendered outside canvas)
+        if (showHUD_flag) {
+          updateHUD();
+        }
       };
+
+      // Global function to render scaled sprite text on external canvas
+      function renderScaledTextOnCanvas(ctx, text, centerX, y, scale, colorID) {
+        // Wait for game to be fully loaded
+        if (
+          !game ||
+          !game.fonts ||
+          !game.currentFont ||
+          !game.fonts[game.currentFont]
+        ) {
+          // Fallback: render with browser font temporarily
+          ctx.font = "bold " + 16 * scale + "px monospace";
+          ctx.fillStyle = colorID === 1 ? "#ff4444" : "#ffffff";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 2;
+          ctx.strokeText(text, centerX, y);
+          ctx.fillText(text, centerX, y);
+          return;
+        }
+
+        let size_x = game.fonts[game.currentFont].size.x;
+        let size_y = game.fonts[game.currentFont].size.y;
+        let font_img = game.fonts[game.currentFont].image;
+
+        // Make sure the font image is loaded
+        if (!font_img || !font_img.complete) {
+          // Use fallback again if image not ready
+          ctx.font = "bold " + 16 * scale + "px monospace";
+          ctx.fillStyle = colorID === 1 ? "#ff4444" : "#ffffff";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = 2;
+          ctx.strokeText(text, centerX, y);
+          ctx.fillText(text, centerX, y);
+          return;
+        }
+
+        // Calculate total width of scaled text for centering
+        let totalWidth = text.length * size_x * scale;
+        let startX = centerX - totalWidth / 2;
+
+        // Render each character with scaling
+        for (let i = 0; i < text.length; i++) {
+          let char = text.charAt(i);
+          let index = game.alphabet.indexOf(char);
+          if (index !== -1) {
+            let clipX = size_x * index;
+            let posX = startX + i * size_x * scale;
+
+            try {
+              ctx.drawImage(
+                font_img,
+                clipX,
+                colorID * size_y,
+                size_x,
+                size_y,
+                posX,
+                y - (size_y * scale) / 2,
+                size_x * scale,
+                size_y * scale
+              );
+            } catch (e) {
+              // Fallback if drawImage fails
+              console.warn("Failed to draw sprite character:", char, e);
+            }
+          }
+        }
+      }
+
       inGame.control = function () {
         if (this.userInput == false) return false;
         if (this.world.keys.ArrowUp) {
@@ -2143,6 +2430,9 @@
 
           this.world.assets.audio.jingle.audio.play();
 
+          // Level completed - calculate and add score
+          levelCompleted(this.world);
+
           if (
             this.world.maps["map_" + (this.world.current_level + 1)] !==
             undefined
@@ -2160,6 +2450,7 @@
               0,
               Math.max(this.world.W / 2, this.world.H / 2),
               () => {
+                hideHUD();
                 this.world.startScene("menu");
               }
             );
@@ -2255,7 +2546,14 @@
                   () => {
                     this.scene.cats.splice(this.scene.cats.indexOf(this), 1);
                     this.world.assets.audio.splash.audio.play();
-                    this.scene.checkWin();
+
+                    // Check if this was the last cat or if we should trigger game over
+                    if (this.scene.cats.length === 0) {
+                      // All cats are dead - Game Over
+                      gameOverTimeUp(this.world);
+                    } else {
+                      this.scene.checkWin();
+                    }
                   }
                 );
                 spawn_effect.sprite.offset.y = 0;
