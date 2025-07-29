@@ -22,11 +22,10 @@
         flex-shrink: 0;
         background-color: #000;
         object-fit: contain;
+        image-rendering: auto;
       }
       .crisp {
-        image-rendering: -moz-crisp-edges;
-        image-rendering: -webkit-crisp-edges;
-        image-rendering: pixelated;
+        image-rendering: auto;
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@farcade/game-sdk@latest/dist/index.min.js"></script>
@@ -468,7 +467,7 @@
           this.H = this.canvas.height = parameters.height || 256;
           this.scale = parameters.scale || 1;
           this.full = false;
-          this.ctx.imageSmoothingEnabled = false;
+          this.ctx.imageSmoothingEnabled = true;
           this.canvas.classList.add("crisp");
           document.body.appendChild(this.canvas);
           // cache canvas
@@ -910,17 +909,56 @@
               tile.positions.forEach((position) => {
                 let x = position.x * this.tile_size,
                   y = position.y * this.tile_size;
-                this.ctx.drawImage(
-                  tile.spritesheet,
-                  Math.floor(tile.current) * this.tile_size,
-                  0,
-                  this.tile_size,
-                  this.tile_size,
-                  x,
-                  y,
-                  this.tile_size,
-                  this.tile_size
-                );
+
+                // Add black border effect for exit tile
+                if (tile.id == "8") {
+                  // exit tile id
+                  // Save context for effects
+                  this.ctx.save();
+
+                  // Force smooth rendering for this specific image
+                  this.ctx.mozImageSmoothingEnabled = true;
+                  this.ctx.webkitImageSmoothingEnabled = true;
+                  this.ctx.msImageSmoothingEnabled = true;
+                  this.ctx.imageSmoothingEnabled = true;
+                  this.ctx.imageSmoothingQuality = "high";
+
+                  // Calculate center and radius for circular border
+                  let centerX = x + this.tile_size / 2;
+                  let centerY = y + this.tile_size / 2;
+                  let radius = this.tile_size / 2 - 1; // Slightly smaller to fit within tile
+
+                  // Draw thick black border for circular logo
+                  this.ctx.beginPath();
+                  this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                  this.ctx.strokeStyle = "black";
+                  this.ctx.lineWidth = 4;
+                  this.ctx.stroke();
+
+                  // Draw the logo
+                  this.ctx.drawImage(
+                    tile.spritesheet,
+                    x,
+                    y,
+                    this.tile_size,
+                    this.tile_size
+                  );
+
+                  this.ctx.restore();
+                } else {
+                  // Normal animated tile rendering
+                  this.ctx.drawImage(
+                    tile.spritesheet,
+                    Math.floor(tile.current) * this.tile_size,
+                    0,
+                    this.tile_size,
+                    this.tile_size,
+                    x,
+                    y,
+                    this.tile_size,
+                    this.tile_size
+                  );
+                }
               });
             });
           });
@@ -1073,7 +1111,7 @@
           {
             type: "img",
             name: "exit",
-            path: "https://image.ibb.co/esCS1o/exit.png",
+            path: "https://i.postimg.cc/Hsjjcqrh/opensea.png",
           },
           {
             type: "img",
