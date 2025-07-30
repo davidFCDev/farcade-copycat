@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <title>Opensea Drop</title>
+    <!-- Google Fonts - Pirate/Adventure Style Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Creepster&family=Jolly+Lodger&display=swap"
+      rel="stylesheet"
+    />
     <style>
       html,
       body {
@@ -38,7 +43,7 @@
       /* HUD Styles - Simple text row without background */
       #gameHUD {
         position: fixed;
-        top: 30px;
+        top: 70px;
         left: 50%;
         transform: translateX(-50%);
         display: none;
@@ -46,6 +51,21 @@
       }
 
       #hudCanvas {
+        display: block;
+        background: transparent;
+      }
+
+      /* Hints Styles - Bottom hints area */
+      #gameHints {
+        position: fixed;
+        bottom: 150px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        z-index: 1000;
+      }
+
+      #hintsCanvas {
         display: block;
         background: transparent;
       }
@@ -58,7 +78,11 @@
       <canvas id="hudCanvas" width="800" height="200"></canvas>
     </div>
 
-    <script src="https://codepen.io/Gthibaud/pen/dybzvNw.js"></script>
+    <!-- Game Hints - Rotating hints at bottom -->
+    <div id="gameHints">
+      <canvas id="hintsCanvas" width="800" height="120"></canvas>
+    </div>
+
     <script>
       // ----------
       // Utility
@@ -143,7 +167,9 @@
           this.sprite = new Sprite(this, sprite_data);
         }
         display() {
-          if (this.sprite === undefined) {
+          if (this.playerSprite !== undefined) {
+            this.playerSprite.display();
+          } else if (this.sprite === undefined) {
             this.ctx.strokeStyle = "#000";
             this.ctx.strokeRect(
               this.body.position.x,
@@ -227,6 +253,103 @@
             this.size.x,
             this.size.y
           );
+        }
+      }
+
+      // PlayerSprite class for managing multiple sprites and states
+      class PlayerSprite {
+        constructor(entity, idle_sprite_data, walk_sprite_data) {
+          this.entity = entity;
+          this.world = this.entity.world;
+          this.ctx = this.world.ctx;
+
+          // Create sprites for different states
+          this.idleSprite = new Sprite(entity, idle_sprite_data);
+          this.walkSprite = new Sprite(entity, walk_sprite_data);
+
+          // Setup animations
+          this.setupAnimations();
+
+          // Current state
+          this.currentState = "idle";
+          this.currentSprite = this.idleSprite;
+
+          // Movement tracking
+          this.isMoving = false;
+          this.lastPosition = {
+            x: entity.body.position.x,
+            y: entity.body.position.y,
+          };
+        }
+
+        setupAnimations() {
+          // Idle animation: 6 frames (192x32, so each frame is 32x32)
+          this.idleSprite.addAnimation("idle", [0, 1, 2, 3, 4, 5]);
+          this.idleSprite.speed = 0.15;
+
+          // Walk animation: 12 frames (384x32, so each frame is 32x32)
+          this.walkSprite.addAnimation(
+            "walk",
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+          );
+          this.walkSprite.speed = 0.25;
+        }
+
+        updateMovementState() {
+          // Check if entity is moving by comparing positions
+          const currentPos = this.entity.body.position;
+          const hasPositionChanged =
+            Math.abs(currentPos.x - this.lastPosition.x) > 0.1 ||
+            Math.abs(currentPos.y - this.lastPosition.y) > 0.1;
+
+          // Update movement state based on translation status
+          if (this.entity.inTranslation) {
+            this.isMoving = true;
+          } else {
+            this.isMoving = false;
+          }
+
+          // Update last position
+          this.lastPosition = { x: currentPos.x, y: currentPos.y };
+        }
+
+        animate() {
+          this.updateMovementState();
+
+          // Switch states based on movement
+          const newState = this.isMoving ? "walk" : "idle";
+
+          if (newState !== this.currentState) {
+            this.currentState = newState;
+            this.currentSprite =
+              newState === "walk" ? this.walkSprite : this.idleSprite;
+          }
+
+          // Animate current sprite
+          if (this.currentState === "idle") {
+            this.currentSprite.animate("idle");
+          } else {
+            this.currentSprite.animate("walk");
+          }
+        }
+
+        display() {
+          this.currentSprite.display();
+        }
+
+        // Proxy methods for compatibility
+        set offset(value) {
+          this.idleSprite.offset = value;
+          this.walkSprite.offset = value;
+        }
+
+        get offset() {
+          return this.currentSprite.offset;
+        }
+
+        set speed(value) {
+          this.idleSprite.speed = value;
+          this.walkSprite.speed = value;
         }
       }
 
@@ -418,7 +541,7 @@
         }
       }
       // ----------
-      // 🕹️ Diorama.js
+      // Diorama.js Engine
       // ----------
       class Diorama {
         constructor(parameters) {
@@ -666,21 +789,41 @@
             (event) => this.keyUp(event),
             false
           );
+
+          // Add mouse and touch events for mobile support
+          this.canvas.addEventListener(
+            "click",
+            (event) => this.mouseEvent(event),
+            false
+          );
+          this.canvas.addEventListener(
+            "touchend",
+            (event) => {
+              event.preventDefault();
+              this.mouseEvent(event);
+            },
+            false
+          );
         }
         keyDown(event) {
           event.preventDefault();
           this.keys[event.code] = true;
-          if (this.keys.KeyF) {
-            this.fullScreen();
-          }
-          if (this.keys.KeyM) {
-            this.mute();
-          }
+          // Only allow Arrow Keys and Space - remove F and M key handling
           this.current_scene.keyEvents(event);
         }
         keyUp(event) {
           event.preventDefault();
           this.keys[event.code] = false;
+        }
+
+        mouseEvent(event) {
+          // Call mouseEvents method of current scene if it exists
+          if (
+            this.current_scene &&
+            typeof this.current_scene.mouseEvents === "function"
+          ) {
+            this.current_scene.mouseEvents(event);
+          }
         }
         // ---
         // Scene Manager
@@ -1100,18 +1243,13 @@
           // Images
           {
             type: "img",
-            name: "coderscrux_font",
-            path: "https://image.ibb.co/fCOd7T/coderscrux_font.png",
+            name: "pirate_captain_idle",
+            path: "https://i.postimg.cc/nMbRcHGM/Pirate-Captain-Idle.png",
           },
           {
             type: "img",
-            name: "controls",
-            path: "https://image.ibb.co/nApwu8/controls.png",
-          },
-          {
-            type: "img",
-            name: "player_sprite",
-            path: "https://image.ibb.co/co3NZ8/player.png",
+            name: "pirate_captain_walk",
+            path: "https://i.postimg.cc/KvtF7jVq/Pirate-Captain-Walk.png",
           },
           {
             type: "img",
@@ -1131,17 +1269,7 @@
           {
             type: "img",
             name: "main_title",
-            path: "https://i.postimg.cc/QM4sgtKG/opensea-title.png",
-          },
-          {
-            type: "img",
-            name: "origami_dark",
-            path: "https://image.ibb.co/gzk2Z8/origami_dark.png",
-          },
-          {
-            type: "img",
-            name: "origami_light",
-            path: "https://image.ibb.co/jruknT/origami_light.png",
+            path: "https://i.postimg.cc/Gm1h8VLy/opensea-logo.png",
           },
           {
             type: "img",
@@ -1170,11 +1298,6 @@
           },
           {
             type: "img",
-            name: "cursor",
-            path: "https://image.ibb.co/bFiNZ8/cursor.png",
-          },
-          {
-            type: "img",
             name: "demo_tileset",
             path: "https://image.ibb.co/b8rLMo/demo_tileset.png",
           },
@@ -1198,16 +1321,16 @@
             name: "coin_sprite",
             path: "https://i.postimg.cc/jdKmMf0V/coin.png",
           },
+          {
+            type: "img",
+            name: "surrender_button",
+            path: "https://i.postimg.cc/KYTPr4CY/redbutton.png",
+          },
           // Audio
           {
             type: "audio",
             name: "jingle",
             path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/waves-bWs1OMPYRpODjTOSXkwhP9CNBPVEMm.mp3?01R0",
-          },
-          {
-            type: "audio",
-            name: "mouvement",
-            path: "http://www.noiseforfun.com/waves/interface-and-media/NFF-select-04.wav",
           },
           {
             type: "audio",
@@ -1221,11 +1344,6 @@
           },
           {
             type: "audio",
-            name: "apparition",
-            path: "http://www.noiseforfun.com/waves/interface-and-media/NFF-bubble-input.wav",
-          },
-          {
-            type: "audio",
             name: "eboulement",
             path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/game-over-eXhbU57XcekmZPntLzuPIn06iXDjbN.mp3?jVoy",
           },
@@ -1236,29 +1354,24 @@
           },
           {
             type: "audio",
-            name: "bump",
-            path: "http://www.noiseforfun.com/waves/action-and-game/NFF-bump.wav",
+            name: "pirate1",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/pirate1-6BrzaKv8igJ1h5IJa3phuLnB0fCX6V.mp3?LPuj",
+          },
+          {
+            type: "audio",
+            name: "pirate2",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/pirate2-8lCFdORuSCzXZCZuW1XFcFFX8ONXPK.mp3?BE5D",
+          },
+          {
+            type: "audio",
+            name: "pirate3",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/pirate3-aDQYxQ22RFTy38OUPgzf6Q7Tib4WHY.mp3?V3je",
           },
 
-          // Bitmap font
+          // No bitmap fonts needed - using Google Fonts instead
         ],
         fonts: [
-          // basic font
-          {
-            name: "coderscrux",
-            image: "coderscrux_font",
-            size: { x: 6, y: 9 },
-          },
-          {
-            name: "origami_dark",
-            image: "origami_dark",
-            size: { x: 8, y: 9 },
-          },
-          {
-            name: "origami_light",
-            image: "origami_light",
-            size: { x: 8, y: 9 },
-          },
+          // All fonts now use Google Fonts (Pirata One, etc.)
         ],
         // box system
         boxes: [
@@ -1366,9 +1479,9 @@
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 11, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 11, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 8, 5, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 5, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1451,10 +1564,10 @@
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 11, 11, 11, 11, 11, 0, 0, 11, 11, 11, 11, 11, 0, 0],
-                  [0, 0, 11, 0, 0, 0, 11, 0, 0, 11, 0, 0, 0, 11, 0, 0],
+                  [0, 0, 11, 0, 0, 0, 11, 0, 0, 11, 0, 0, 17, 11, 0, 0],
                   [0, 0, 11, 0, 8, 0, 11, 0, 0, 11, 0, 8, 0, 11, 0, 0],
                   [0, 0, 11, 0, 0, 0, 11, 0, 0, 11, 0, 0, 0, 11, 0, 0],
-                  [0, 0, 11, 0, 0, 0, 11, 0, 0, 11, 0, 0, 0, 11, 0, 0],
+                  [0, 0, 11, 17, 0, 0, 11, 0, 0, 11, 0, 0, 0, 11, 0, 0],
                   [0, 0, 11, 4, 4, 0, 11, 0, 0, 11, 0, 0, 0, 11, 0, 0],
                   [0, 0, 11, 0, 0, 0, 11, 0, 0, 11, 0, 4, 4, 11, 0, 0],
                   [0, 0, 11, 0, 0, 0, 11, 0, 0, 11, 0, 0, 0, 11, 0, 0],
@@ -1510,7 +1623,7 @@
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 4, 4, 4, 4, 4, 0, 0, 4, 4, 4, 4, 4, 0, 0],
-                  [0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0],
+                  [0, 0, 4, 0, 0, 0, 17, 0, 0, 17, 0, 0, 0, 4, 0, 0],
                   [0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0],
                   [0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 4, 0, 0],
                   [0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0],
@@ -1573,7 +1686,7 @@
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 11, 11, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 11, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 17, 11, 0, 0, 0],
                   [0, 0, 0, 0, 11, 11, 11, 0, 0, 0, 11, 0, 11, 0, 0, 0],
                   [0, 0, 0, 0, 11, 0, 11, 0, 0, 0, 11, 0, 11, 0, 0, 0],
                   [0, 0, 0, 0, 11, 0, 11, 0, 0, 0, 11, 9, 11, 0, 0, 0],
@@ -1632,13 +1745,13 @@
                   [4, 0, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                   [4, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
-                  [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
+                  [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 17, 6, 6, 4, 4, 4],
                   [4, 4, 4, 6, 5, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 5, 6, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 6, 6, 4, 6, 6, 6, 6, 8, 4, 4],
                   [4, 4, 4, 6, 6, 4, 6, 6, 4, 6, 4, 4, 6, 4, 4, 4],
                   [4, 4, 4, 4, 6, 6, 6, 6, 4, 6, 6, 6, 6, 4, 4, 4],
-                  [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
+                  [4, 4, 4, 6, 6, 6, 6, 6, 6, 17, 6, 6, 6, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 5, 6, 6, 6, 6, 0, 0, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 0, 7, 4, 4, 4],
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4],
@@ -1692,7 +1805,7 @@
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                   [4, 4, 4, 6, 6, 14, 0, 6, 6, 6, 6, 15, 4, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
-                  [4, 4, 4, 6, 6, 6, 8, 6, 6, 6, 4, 6, 6, 4, 4, 4],
+                  [4, 4, 4, 6, 6, 6, 8, 6, 6, 6, 4, 6, 17, 4, 4, 4],
                   [4, 4, 4, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 7, 6, 4, 4, 4],
@@ -1700,10 +1813,130 @@
                   [4, 4, 4, 6, 6, 14, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 0, 6, 4, 4, 4, 4],
                   [4, 4, 4, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
-                  [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 8, 13, 4, 4, 4],
+                  [4, 4, 4, 6, 6, 6, 6, 6, 6, 17, 6, 8, 13, 4, 4, 4],
                   [4, 4, 4, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 4, 4, 4],
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                ],
+              }, // wall layer
+            ],
+          },
+
+          {
+            name: "map_7",
+            tileset: "demo_tileset",
+            // ground
+            layers: [
+              // ground layer
+              {
+                name: "ground",
+                offset: {
+                  x: 0,
+                  y: 4,
+                },
+                geometry: [
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                ],
+              },
+              // ice / arrows / layer - MAZE LAYOUT
+              {
+                name: "onGround",
+                offset: {
+                  x: 0,
+                  y: 0,
+                },
+                geometry: [
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 0, 6, 4, 6, 6, 4, 6, 6, 6, 4, 6, 6, 6, 8, 4],
+                  [4, 6, 6, 4, 6, 4, 4, 6, 4, 6, 4, 6, 4, 4, 6, 4],
+                  [4, 6, 4, 4, 6, 4, 6, 6, 4, 6, 6, 6, 4, 17, 6, 4],
+                  [4, 6, 6, 6, 6, 4, 6, 4, 4, 4, 4, 6, 4, 6, 4, 4],
+                  [4, 4, 4, 6, 4, 4, 6, 6, 6, 6, 4, 6, 6, 6, 4, 4],
+                  [4, 6, 6, 6, 4, 6, 6, 4, 6, 4, 4, 4, 6, 4, 4, 4],
+                  [4, 6, 4, 4, 4, 6, 4, 4, 6, 6, 6, 6, 6, 6, 5, 4],
+                  [4, 6, 6, 6, 6, 6, 4, 6, 6, 4, 6, 4, 4, 4, 6, 4],
+                  [4, 4, 6, 4, 4, 4, 4, 6, 4, 4, 6, 6, 6, 6, 6, 4],
+                  [4, 5, 6, 6, 6, 6, 6, 6, 4, 17, 6, 4, 6, 4, 6, 4],
+                  [4, 6, 4, 6, 4, 4, 4, 6, 4, 6, 6, 4, 6, 6, 6, 4],
+                  [4, 6, 4, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 6, 4, 4],
+                  [4, 6, 4, 4, 4, 6, 4, 4, 4, 6, 6, 6, 5, 6, 7, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 6, 4, 4, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                ],
+              }, // wall layer
+            ],
+          },
+
+          {
+            name: "map_8",
+            tileset: "demo_tileset",
+            // ground - Advanced Two Pirates Challenge
+            layers: [
+              // ground layer
+              {
+                name: "ground",
+                offset: {
+                  x: 0,
+                  y: 4,
+                },
+                geometry: [
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 0, 3, 3, 0, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 0, 3, 3, 0, 0, 3, 3, 3, 3, 0],
+                  [0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0],
+                  [0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0],
+                  [0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0],
+                  [0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0],
+                  [0, 3, 3, 3, 3, 0, 0, 3, 3, 0, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 0, 3, 3, 0, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+              },
+              // Complex multi-island layout with bridges and obstacles
+              {
+                name: "onGround",
+                offset: {
+                  x: 0,
+                  y: 0,
+                },
+                geometry: [
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 11, 11, 11, 11, 0, 0, 0, 0, 0, 0, 11, 11, 11, 11, 0],
+                  [0, 11, 0, 5, 11, 0, 0, 0, 0, 0, 0, 0, 17, 0, 11, 0],
+                  [0, 11, 0, 7, 11, 0, 0, 11, 11, 0, 0, 0, 5, 0, 11, 0],
+                  [0, 11, 17, 0, 11, 0, 0, 11, 11, 0, 0, 0, 0, 8, 11, 0],
+                  [0, 0, 0, 0, 11, 11, 11, 11, 11, 11, 11, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
+                  [0, 11, 11, 0, 11, 0, 0, 11, 11, 0, 0, 11, 0, 11, 11, 0],
+                  [0, 11, 8, 0, 11, 0, 0, 11, 11, 0, 0, 11, 0, 7, 11, 0],
+                  [0, 11, 5, 0, 11, 0, 0, 0, 0, 0, 0, 11, 0, 17, 11, 0],
+                  [0, 11, 11, 11, 11, 0, 0, 0, 0, 0, 0, 11, 11, 11, 11, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 ],
               }, // wall layer
             ],
@@ -1799,6 +2032,11 @@
       let hudCanvasCtx = null;
       const BASE_POINTS_PER_LEVEL = 100;
 
+      // Surrender button variables
+      let surrenderButtonX = 650;
+      let surrenderButtonY = 100;
+      let surrenderButtonSize = 160;
+
       function showHUD() {
         showHUD_flag = true;
         document.getElementById("gameHUD").style.display = "block";
@@ -1807,7 +2045,15 @@
         if (!hudCanvasCtx) {
           hudCanvasCtx = document.getElementById("hudCanvas").getContext("2d");
           hudCanvasCtx.imageSmoothingEnabled = false;
+
+          // Add event listeners for surrender button
+          const hudCanvas = document.getElementById("hudCanvas");
+          hudCanvas.addEventListener("click", handleHUDClick);
+          hudCanvas.addEventListener("touchend", handleHUDClick);
         }
+
+        // Also show hints during gameplay
+        showHints();
 
         updateHUD();
       }
@@ -1819,6 +2065,9 @@
           clearInterval(timerInterval);
           timerInterval = null;
         }
+
+        // Also hide hints when hiding HUD
+        hideHints();
       }
 
       function updateScore() {
@@ -1835,21 +2084,81 @@
         // Clear canvas - now wider to accommodate larger scores
         hudCanvasCtx.clearRect(0, 0, 800, 200);
 
-        // Render Score and Timer in column - large scale with more spacing
+        // Render Score and Timer with pirate-style fonts
         let scoreText = "Score: " + gameScore;
         let timerText = "Time: " + levelTime;
-        let timerColor = levelTime <= 10 ? 1 : 0;
 
-        // Position score on top, timer on bottom - centered horizontally in wider canvas
-        renderScaledTextOnCanvas(hudCanvasCtx, scoreText, 400, 60, 8, 0);
-        renderScaledTextOnCanvas(
-          hudCanvasCtx,
-          timerText,
-          400,
-          140,
-          8,
-          timerColor
+        // Set text properties - Pirate style with even larger size
+        hudCanvasCtx.font = "bold 56px 'Pirata One', 'Jolly Lodger', serif";
+        hudCanvasCtx.textAlign = "center";
+        hudCanvasCtx.textBaseline = "middle";
+
+        // Draw Score with enhanced shadow for pirate aesthetic
+        hudCanvasCtx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        hudCanvasCtx.fillText(scoreText, 403, 53); // Stronger shadow offset
+
+        hudCanvasCtx.fillStyle = "#ffffff";
+        hudCanvasCtx.fillText(scoreText, 400, 50);
+
+        // Draw Timer with color based on time remaining
+        let timerColor = levelTime <= 10 ? "#ff4444" : "#ffffff"; // Red when low time
+        let shadowColor =
+          levelTime <= 10 ? "rgba(255, 0, 0, 0.8)" : "rgba(0, 0, 0, 0.8)";
+
+        hudCanvasCtx.fillStyle = shadowColor;
+        hudCanvasCtx.fillText(timerText, 403, 153); // Stronger shadow offset
+
+        hudCanvasCtx.fillStyle = timerColor;
+        hudCanvasCtx.fillText(timerText, 400, 150);
+
+        // Draw Surrender Button
+        if (
+          game &&
+          game.assets &&
+          game.assets.image &&
+          game.assets.image.surrender_button
+        ) {
+          let buttonImage = game.assets.image.surrender_button.image;
+          if (buttonImage && buttonImage.complete) {
+            // Draw the red button image
+            hudCanvasCtx.drawImage(
+              buttonImage,
+              surrenderButtonX - surrenderButtonSize / 2,
+              surrenderButtonY - surrenderButtonSize / 2,
+              surrenderButtonSize,
+              surrenderButtonSize
+            );
+          }
+        }
+      }
+
+      // Function to handle HUD clicks (surrender button)
+      function handleHUDClick(event) {
+        if (!showHUD_flag || !hudCanvasCtx) return;
+
+        let rect = document.getElementById("hudCanvas").getBoundingClientRect();
+        let x =
+          (event.clientX ||
+            (event.touches && event.touches[0]
+              ? event.touches[0].clientX
+              : event.changedTouches[0].clientX)) - rect.left;
+        let y =
+          (event.clientY ||
+            (event.touches && event.touches[0]
+              ? event.touches[0].clientY
+              : event.changedTouches[0].clientY)) - rect.top;
+
+        // Scale coordinates to canvas resolution
+        x = x * (800 / rect.width);
+        y = y * (200 / rect.height);
+
+        // Check if click is on surrender button
+        let distance = Math.sqrt(
+          Math.pow(x - surrenderButtonX, 2) + Math.pow(y - surrenderButtonY, 2)
         );
+        if (distance <= surrenderButtonSize / 2) {
+          surrenderGame(game);
+        }
       }
 
       function startLevelTimer(gameWorld) {
@@ -1890,54 +2199,396 @@
         gameScore += levelPoints;
         updateScore();
 
+        // Keep HUD visible for a moment to show final score
+        // Don't hide HUD here - let the transition handle it
+
         // Continue with normal level completion logic
       }
 
       function gameOverTimeUp(gameWorld) {
         hideHUD();
-        // Trigger game over scene or restart level
-        gameWorld.startScene("levels");
+        stopAllMusic(); // Stop background music
+
+        // Capture final score for SDK integration later
+        console.log("GAME OVER - Final Score:", gameScore);
+
+        // Reset game to level 1 for next play
+        gameWorld.current_level = 1;
+        resetGame();
+
+        // Return to menu (menu will start its own music)
+        gameWorld.startScene("menu");
       }
 
+      function surrenderGame(gameWorld) {
+        hideHUD();
+        stopAllMusic(); // Stop background music
+
+        // Capture final score for SDK integration later
+        console.log("GAME OVER - Player Surrendered - Final Score:", gameScore);
+
+        // Reset game to level 1 for next play
+        gameWorld.current_level = 1;
+        resetGame();
+
+        // Return to menu (menu will start its own music)
+        gameWorld.startScene("menu");
+      }
       function resetGame() {
         gameScore = 0;
         levelTime = 30;
         updateScore();
         updateTimer();
       }
+
+      // ========== HINTS SYSTEM ==========
+      let hintsCanvasCtx = null;
+      let currentHintIndex = 0;
+      let hintOpacity = 0;
+      let hintFadeDirection = 1; // 1 for fade in, -1 for fade out
+      let hintDisplayTime = 0;
+      let hintInterval = null;
+      let showHints_flag = false;
+
+      const gameHints = [
+        "Take all the coins, or not...",
+        "Yo ho ho and a bottle of rum!",
+        "Be fast and get more points...",
+        "Dead men tell no tales...",
+        "Coins give you more points...",
+        "Aye, aye, Captain!",
+        "🔴 Use red button to surrender (S key)",
+      ];
+
+      const HINT_FADE_SPEED = 0.02;
+      const HINT_DISPLAY_DURATION = 5000; // 5 seconds (increased from 3)
+      const HINT_FADE_DURATION = 500; // 0.5 seconds
+
+      function showHints() {
+        showHints_flag = true;
+        document.getElementById("gameHints").style.display = "block";
+
+        // Initialize canvas context for hints
+        if (!hintsCanvasCtx) {
+          hintsCanvasCtx = document
+            .getElementById("hintsCanvas")
+            .getContext("2d");
+          hintsCanvasCtx.imageSmoothingEnabled = false;
+
+          // First time setup - start from beginning
+          startHintRotation();
+        } else {
+          // Continue from where we left off
+          continueHintRotation();
+        }
+      }
+
+      function hideHints() {
+        showHints_flag = false;
+        document.getElementById("gameHints").style.display = "none";
+
+        if (hintInterval) {
+          clearInterval(hintInterval);
+          hintInterval = null;
+        }
+
+        // Don't reset hint state - keep continuity between levels
+        // Only reset animation state, preserve currentHintIndex
+        hintOpacity = 0;
+        hintFadeDirection = 1;
+        hintDisplayTime = 0;
+      }
+
+      function startHintRotation() {
+        if (hintInterval) {
+          clearInterval(hintInterval);
+        }
+
+        // First time initialization only
+        currentHintIndex = 0;
+        hintOpacity = 0;
+        hintFadeDirection = 1;
+        hintDisplayTime = Date.now();
+
+        // Update hints every 50ms for smooth animation
+        hintInterval = setInterval(() => {
+          updateHints();
+        }, 50);
+      }
+
+      function continueHintRotation() {
+        if (hintInterval) {
+          clearInterval(hintInterval);
+        }
+
+        // Continue from exactly where we left off
+        hintDisplayTime = Date.now();
+        hintOpacity = 0;
+        hintFadeDirection = 1;
+
+        // Update hints every 50ms for smooth animation
+        hintInterval = setInterval(() => {
+          updateHints();
+        }, 50);
+      }
+
+      function updateHints() {
+        if (!showHints_flag) return;
+
+        const currentTime = Date.now();
+        const timeSinceStart = currentTime - hintDisplayTime;
+
+        // Handle fade in
+        if (hintFadeDirection === 1) {
+          hintOpacity += HINT_FADE_SPEED;
+          if (hintOpacity >= 1) {
+            hintOpacity = 1;
+            hintFadeDirection = 0; // Hold at full opacity
+          }
+        }
+        // Handle hold phase
+        else if (hintFadeDirection === 0) {
+          if (timeSinceStart >= HINT_DISPLAY_DURATION) {
+            hintFadeDirection = -1; // Start fade out
+          }
+        }
+        // Handle fade out
+        else if (hintFadeDirection === -1) {
+          hintOpacity -= HINT_FADE_SPEED;
+          if (hintOpacity <= 0) {
+            hintOpacity = 0;
+            // Move to next hint
+            currentHintIndex = (currentHintIndex + 1) % gameHints.length;
+            hintFadeDirection = 1;
+            hintDisplayTime = currentTime;
+          }
+        }
+
+        renderHints();
+      }
+
+      function renderHints() {
+        if (!hintsCanvasCtx || !showHints_flag) return;
+
+        // Clear canvas - updated dimensions
+        hintsCanvasCtx.clearRect(0, 0, 800, 120);
+
+        if (hintOpacity > 0) {
+          const hintText = gameHints[currentHintIndex];
+
+          // Set text properties - Pirate style font for hints with increased size
+          hintsCanvasCtx.font = "bold 46px 'Pirata One', 'Jolly Lodger', serif";
+          hintsCanvasCtx.textAlign = "center";
+          hintsCanvasCtx.textBaseline = "middle";
+
+          // Apply opacity
+          hintsCanvasCtx.globalAlpha = hintOpacity;
+
+          // Draw text with enhanced shadow for pirate aesthetic
+          hintsCanvasCtx.fillStyle = "rgba(0, 0, 0, 0.8)";
+          hintsCanvasCtx.fillText(hintText, 403, 63); // Enhanced shadow offset
+
+          hintsCanvasCtx.fillStyle = "#ffffff";
+          hintsCanvasCtx.fillText(hintText, 400, 60);
+
+          // Reset global alpha
+          hintsCanvasCtx.globalAlpha = 1;
+        }
+      }
+      // ========== END HINTS SYSTEM ==========
+
+      // ========== BACKGROUND MUSIC SYSTEM ==========
+      let currentBackgroundMusic = null;
+      let pirateTracks = ["pirate1", "pirate2", "pirate3"];
+      let currentTrackIndex = 0;
+      let musicVolume = 0.08; // Softer volume level
+
+      function stopAllMusic() {
+        // Stop menu music
+        if (
+          game &&
+          game.assets &&
+          game.assets.audio &&
+          game.assets.audio.jingle
+        ) {
+          game.assets.audio.jingle.audio.pause();
+          game.assets.audio.jingle.audio.currentTime = 0;
+        }
+
+        // Stop any background music
+        if (currentBackgroundMusic) {
+          currentBackgroundMusic.pause();
+          currentBackgroundMusic.currentTime = 0;
+          currentBackgroundMusic = null;
+        }
+      }
+
+      function playRandomPirateMusic() {
+        if (!game || !game.assets || !game.assets.audio) return;
+
+        // Stop any current background music
+        if (currentBackgroundMusic) {
+          currentBackgroundMusic.pause();
+          currentBackgroundMusic = null;
+        }
+
+        // Randomly select a pirate track
+        currentTrackIndex = Math.floor(Math.random() * pirateTracks.length);
+        let trackName = pirateTracks[currentTrackIndex];
+
+        if (
+          game.assets.audio[trackName] &&
+          game.assets.audio[trackName].audio
+        ) {
+          currentBackgroundMusic = game.assets.audio[trackName].audio;
+          currentBackgroundMusic.volume = musicVolume;
+          currentBackgroundMusic.currentTime = 0;
+          currentBackgroundMusic.loop = false; // Don't loop, we'll pick random next
+
+          // When track ends, play another random track
+          currentBackgroundMusic.addEventListener(
+            "ended",
+            function () {
+              // Small delay before next track to avoid performance issues
+              setTimeout(() => {
+                playRandomPirateMusic();
+              }, 2000);
+            },
+            { once: true }
+          );
+
+          currentBackgroundMusic.play().catch((e) => {
+            console.log("Could not play background music:", e);
+          });
+        }
+      }
+
+      function ensurePirateMusicPlaying() {
+        // Only start pirate music if no music is currently playing
+        if (
+          !currentBackgroundMusic ||
+          currentBackgroundMusic.paused ||
+          currentBackgroundMusic.ended ||
+          currentBackgroundMusic.currentTime === 0
+        ) {
+          console.log("Starting new pirate music...");
+          playRandomPirateMusic();
+        } else {
+          console.log("Pirate music already playing, continuing...");
+        }
+      }
+
+      function playMenuMusic() {
+        stopAllMusic();
+
+        if (
+          game &&
+          game.assets &&
+          game.assets.audio &&
+          game.assets.audio.jingle
+        ) {
+          game.assets.audio.jingle.audio.volume = musicVolume;
+          game.assets.audio.jingle.audio.loop = true;
+          game.assets.audio.jingle.audio.currentTime = 0;
+          game.assets.audio.jingle.audio.play().catch((e) => {
+            console.log("Could not play menu music:", e);
+          });
+        }
+      }
+      // ========== END BACKGROUND MUSIC SYSTEM ==========
+
       // ========== END SCORE AND TIMER SYSTEM ==========
 
       // menu scene
       let menu = new Scene("menu");
       menu.keyEvents = function (event) {
+        // Only allow Arrow Keys and Space
+        if (
+          event.code !== "ArrowUp" &&
+          event.code !== "ArrowDown" &&
+          event.code !== "ArrowLeft" &&
+          event.code !== "ArrowRight" &&
+          event.code !== "Space"
+        ) {
+          return; // Ignore other keys
+        }
+
         if (
           this.world.keys.ArrowDown &&
           this.selection < this.button.length - 1
         ) {
-          this.world.assets.audio.selection.audio.play();
+          // Removed sound for navigation - this.world.assets.audio.selection.audio.play();
           this.selection += 1;
         } else if (this.world.keys.ArrowUp && this.selection > 0) {
-          this.world.assets.audio.selection.audio.play();
+          // Removed sound for navigation - this.world.assets.audio.selection.audio.play();
           this.selection -= 1;
         }
         if (this.world.keys.Space) {
           this.world.assets.audio.selection.audio.play();
+
+          // If PLAY is selected, ensure we start from level 1
+          if (this.selection === 0) {
+            // PLAY button
+            this.world.current_level = 1;
+            resetGame();
+          }
+
           this.world.startScene(this.button[this.selection].link);
+        }
+      };
+
+      // Add mouse and touch support for mobile devices
+      menu.mouseEvents = function (event) {
+        if (event.type === "click" || event.type === "touchend") {
+          let rect = this.world.canvas.getBoundingClientRect();
+          let x =
+            (event.clientX ||
+              (event.touches && event.touches[0]
+                ? event.touches[0].clientX
+                : event.changedTouches[0].clientX)) - rect.left;
+          let y =
+            (event.clientY ||
+              (event.touches && event.touches[0]
+                ? event.touches[0].clientY
+                : event.changedTouches[0].clientY)) - rect.top;
+
+          // Scale coordinates to canvas resolution
+          x = x * (this.world.W / rect.width);
+          y = y * (this.world.H / rect.height);
+
+          // Check if click is on any button
+          for (let i = 0; i < this.button.length; i++) {
+            let buttonY = this.select_pos.y + 20 + i * 25; // Added 20px offset to match visual position
+            let buttonWidth = this.button[i].name.length * 12; // Approximate button width
+            let buttonHeight = 30; // Approximate button height
+
+            if (
+              x >= this.select_pos.x - buttonWidth / 2 &&
+              x <= this.select_pos.x + buttonWidth / 2 &&
+              y >= buttonY - buttonHeight / 2 &&
+              y <= buttonY + buttonHeight / 2
+            ) {
+              this.selection = i;
+              this.world.assets.audio.selection.audio.play();
+
+              // If PLAY is selected, ensure we start from level 1
+              if (this.selection === 0) {
+                // PLAY button
+                this.world.current_level = 1;
+                resetGame();
+              }
+
+              this.world.startScene(this.button[this.selection].link);
+              break;
+            }
+          }
         }
       };
       menu.init = function () {
         this.init_once = true;
 
-        // Play waves sound on menu start
-        if (
-          this.world.assets.audio.jingle &&
-          this.world.assets.audio.jingle.audio
-        ) {
-          this.world.assets.audio.jingle.audio.currentTime = 0;
-          this.world.assets.audio.jingle.audio.play().catch((e) => {
-            console.log("Could not play jingle audio:", e);
-          });
-        }
+        // Play menu music (waves sound)
+        playMenuMusic();
 
         // custom data
         this.button = [
@@ -1949,20 +2600,15 @@
             name: "SELECT",
             link: "levels",
           },
-          {
-            name: "CONTROLS",
-            link: "controls",
-          },
         ];
         this.texteMax =
           Math.max(...this.button.map((button) => button.name.length)) * 6;
         this.selection = 0;
         this.select_pos = {
           x: this.world.W / 2,
-          y: 110,
+          y: 110, // Back to original position for background image
         };
-        this.cursor_phase = 0;
-        this.cursor = this.world.assets.image.cursor.image;
+        // cursor removed - no longer needed
         // background
         let background_image = this.world.assets.image.pattern.image;
         this.pattern = this.world.ctx.createPattern(background_image, "repeat");
@@ -1976,20 +2622,26 @@
           -this.world.tile_size,
           -this.world.tile_size
         );
-        let sprite_data = {
-          image: "player_sprite",
+        let idle_sprite_data = {
+          image: "pirate_captain_idle",
           size: {
-            x: 18,
-            y: 18,
+            x: 32,
+            y: 32,
           },
         };
-        this.cat.setSprite(sprite_data);
-        this.cat.sprite.addAnimation(
-          "idle",
-          [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        let walk_sprite_data = {
+          image: "pirate_captain_walk",
+          size: {
+            x: 32,
+            y: 32,
+          },
+        };
+        this.cat.playerSprite = new PlayerSprite(
+          this.cat,
+          idle_sprite_data,
+          walk_sprite_data
         );
-        this.cat.sprite.speed = 0.2;
-        this.cat.sprite.offset.y = -3;
+        this.cat.playerSprite.offset = { x: 0, y: -8 };
       };
       menu.render = function () {
         this.animatedBackground();
@@ -2018,21 +2670,39 @@
 
         this.ctx.restore();
         this.displaySelection();
-        // notice
+        // notice with pirate fonts
         this.world.ctx.fillStyle = "rgba(0,0,0,0.6)";
-        this.world.ctx.fillRect(0, this.world.H - 50, this.world.W, 33);
-        this.world.setFont("origami_light");
-        this.world.write(
+        this.world.ctx.fillRect(0, this.world.H - 60, this.world.W, 50); // Increased height from 40 to 50 and adjusted Y position
+
+        // Use smaller pirate font for menu instructions
+        this.world.ctx.font = "16px 'Pirata One', sans-serif"; // Reduced from 18px to 16px
+        this.world.ctx.fillStyle = "#FFD700";
+        this.world.ctx.strokeStyle = "#8B4513";
+        this.world.ctx.lineWidth = 2;
+        this.world.ctx.textAlign = "center";
+
+        // Arrow keys instruction
+        this.world.ctx.strokeText(
           "Arrow keys to select",
           this.world.W / 2,
-          this.world.H - 46,
-          "center"
+          this.world.H - 40
         );
-        this.world.write(
+        this.world.ctx.fillText(
+          "Arrow keys to select",
+          this.world.W / 2,
+          this.world.H - 40
+        );
+
+        // Space to confirm instruction
+        this.world.ctx.strokeText(
           "[Space] to Confirm",
           this.world.W / 2,
-          this.world.H - 30,
-          "center"
+          this.world.H - 20
+        );
+        this.world.ctx.fillText(
+          "[Space] to Confirm",
+          this.world.W / 2,
+          this.world.H - 20
         );
       };
       menu.displaySelection = function () {
@@ -2065,33 +2735,33 @@
 
         this.ctx.restore();
 
-        // Display the buttons text over the image
+        // Display the buttons text over the image with pirate fonts
         for (i in this.button) {
+          // Set pirate font and colors for buttons
+          this.world.ctx.font = "24px 'Pirata One', sans-serif";
+          this.world.ctx.textAlign = "center";
+          this.world.ctx.lineWidth = 3; // Increased from 2 to 3 for thicker border
+
           if (i == this.selection) {
-            this.world.setFont("origami_light");
+            // Selected button - bright gold with brown shadow
+            this.world.ctx.fillStyle = "#FFD700";
+            this.world.ctx.strokeStyle = "#8B4513";
           } else {
-            this.world.setFont("origami_dark");
+            // Unselected button - darker gold with black shadow
+            this.world.ctx.fillStyle = "#B8860B";
+            this.world.ctx.strokeStyle = "#2F1B14";
           }
+
           let title = this.button[i].name;
-          this.world.write(
-            title,
-            this.select_pos.x,
-            this.select_pos.y + i * 20,
-            "center"
-          );
+          let x = this.select_pos.x;
+          let y = this.select_pos.y + 20 + i * 25; // Added 20px offset to move buttons down without affecting background
+
+          // Draw text with outline
+          this.world.ctx.strokeText(title, x, y);
+          this.world.ctx.fillText(title, x, y);
         }
 
-        // Display cursor
-        this.cursor_phase += 0.1;
-        if (this.cursor_phase > 1 / Math.sin(0.2)) {
-          this.cursor_phase = -1;
-        }
-        let x = this.select_pos.x + Math.sin(this.cursor_phase) * 2 - 20;
-        this.world.ctx.drawImage(
-          this.cursor,
-          x - (this.button[this.selection].name.length * 10) / 2,
-          this.select_pos.y + 20 * this.selection - 2
-        );
+        // Cursor removed - no more hand icon pointing at buttons
       };
       menu.animatedBackground = function () {
         // Smooth ocean-like movement simulation
@@ -2125,10 +2795,18 @@
       };
       let levels = new Scene("levels");
       levels.keyEvents = function (event) {
-        if (this.world.keys.KeyE) {
-          this.world.assets.audio.selection.audio.play();
-          this.world.startScene("menu");
+        // Only allow Arrow Keys and Space
+        if (
+          event.code !== "ArrowUp" &&
+          event.code !== "ArrowDown" &&
+          event.code !== "ArrowLeft" &&
+          event.code !== "ArrowRight" &&
+          event.code !== "Space"
+        ) {
+          return; // Ignore other keys
         }
+
+        // Remove KeyE - only allow Arrow Keys and Space
         if (
           this.world.keys.ArrowDown &&
           this.selection + 5 < this.world.mapsMax
@@ -2161,6 +2839,9 @@
         this.init_once = true;
         this.selection = 0;
         this.scale = 0;
+
+        // Ensure pirate music is playing, but don't restart if already playing
+        ensurePirateMusicPlaying();
       };
       levels.render = function () {
         this.world.clear("black");
@@ -2179,15 +2860,14 @@
           this.world.W - 32,
           this.world.H - 46 - 32
         );
-        this.world.setFont("origami_light");
-        this.world.setFont("origami_dark");
+        // No need for bitmap fonts - using CSS fonts
         let show = Math.min(this.world.mapsMax, 20);
         for (let i = 0; i < show; i++) {
           let level_id = i + 20 * Math.floor(this.selection / 20);
           let position_x = 32 + Math.floor(i % 5) * 40,
             position_y = 32 + Math.floor(i / 5) * 40;
           if (level_id == this.selection) {
-            this.world.setFont("origami_light");
+            // Selected level with glowing box
             this.world.drawBox(
               "selection",
               position_x - offset / 2,
@@ -2196,61 +2876,90 @@
               24 + offset
             );
           } else {
-            this.world.setFont("origami_dark");
+            // Unselected level with flat frame
             this.world.drawBox("flat_frame", position_x, position_y, 24, 24);
           }
-          this.world.write(
-            (level_id + 1).toString(),
+          // Use pirate font for level numbers
+          this.world.ctx.font = "16px 'Pirata One', sans-serif";
+          this.world.ctx.textAlign = "center";
+          this.world.ctx.lineWidth = 1;
+          this.world.ctx.fillStyle = "#FFD700";
+          this.world.ctx.strokeStyle = "#8B4513";
+
+          let levelText = (level_id + 1).toString();
+          this.world.ctx.strokeText(
+            levelText,
             position_x + 13,
-            position_y + 8,
-            "center"
+            position_y + 16
           );
+          this.world.ctx.fillText(levelText, position_x + 13, position_y + 16);
         }
-        // notice
+        // notice with pirate fonts for level selection
         this.world.ctx.fillStyle = "rgba(0,0,0,0.6)";
-        this.world.ctx.fillRect(0, this.world.H - 50, this.world.W, 33);
-        this.world.setFont("origami_light");
-        this.world.write(
+        this.world.ctx.fillRect(0, this.world.H - 60, this.world.W, 50); // Increased height from 33 to 50 and adjusted Y position
+
+        // Use pirate font for level selection instructions
+        this.world.ctx.font = "18px 'Pirata One', sans-serif";
+        this.world.ctx.fillStyle = "#FFD700";
+        this.world.ctx.strokeStyle = "#8B4513";
+        this.world.ctx.lineWidth = 2;
+        this.world.ctx.textAlign = "center";
+
+        // Arrow keys instruction
+        this.world.ctx.strokeText(
           "Arrow keys to select",
           this.world.W / 2,
-          this.world.H - 46,
-          "center"
+          this.world.H - 40
         );
-        this.world.write(
-          "[Space] to Confirm, [E] to exit",
+        this.world.ctx.fillText(
+          "Arrow keys to select",
           this.world.W / 2,
-          this.world.H - 30,
-          "center"
+          this.world.H - 40
+        );
+
+        // Space to confirm instruction
+        this.world.ctx.strokeText(
+          "[Space] to Confirm",
+          this.world.W / 2,
+          this.world.H - 20
+        );
+        this.world.ctx.fillText(
+          "[Space] to Confirm",
+          this.world.W / 2,
+          this.world.H - 20
         );
       };
       let inGame = new Scene("inGame");
       inGame.keyEvents = function (event) {
-        if (this.world.keys.KeyE && this.userInput) {
-          this.transition.start(
-            0,
-            Math.max(this.world.W / 2, this.world.H / 2),
-            () => {
-              hideHUD();
-              this.world.startScene("menu");
-            }
-          );
+        // Only allow Arrow Keys, Space, and S for surrender
+        if (
+          event.code !== "ArrowUp" &&
+          event.code !== "ArrowDown" &&
+          event.code !== "ArrowLeft" &&
+          event.code !== "ArrowRight" &&
+          event.code !== "Space" &&
+          event.code !== "KeyS"
+        ) {
+          return; // Ignore other keys
         }
-        if (this.world.keys.KeyR && this.userInput) {
-          this.transition.start(
-            0,
-            Math.max(this.world.W / 2, this.world.H / 2),
-            () => {
-              this.world.startScene("inGame");
-            }
-          );
+
+        // Handle surrender with S key
+        if (event.code === "KeyS" && event.type === "keydown") {
+          surrenderGame(game);
+          return;
         }
+
+        // Remove E and R key handling - only allow Arrow Keys and Space
       };
       inGame.init = function () {
         this.won = false;
         this.userInput = true;
         this.world.initMap("map_" + this.world.current_level);
 
-        // Show HUD and start timer
+        // Ensure pirate music is playing, but don't restart if already playing
+        ensurePirateMusicPlaying();
+
+        // Show HUD and start timer - ensure HUD is always visible during gameplay
         showHUD();
         updateScore();
         startLevelTimer(this.world);
@@ -2330,17 +3039,26 @@
       };
       inGame.addCat = function (x, y) {
         let cat = new Cat(this, x, y);
-        let sprite_data = {
-          image: "player_sprite",
+        let idle_sprite_data = {
+          image: "pirate_captain_idle",
           size: {
-            x: 18,
-            y: 18,
+            x: 32,
+            y: 32,
           },
         };
-        cat.setSprite(sprite_data);
-        cat.sprite.addAnimation("idle", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-        cat.sprite.speed = 0.2;
-        cat.sprite.offset.y = -3;
+        let walk_sprite_data = {
+          image: "pirate_captain_walk",
+          size: {
+            x: 32,
+            y: 32,
+          },
+        };
+        cat.playerSprite = new PlayerSprite(
+          cat,
+          idle_sprite_data,
+          walk_sprite_data
+        );
+        cat.playerSprite.offset = { x: 0, y: -8 };
         let spawn_data = {
           image: "spawn_effect",
           frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -2361,14 +3079,14 @@
         this.world.renderMap();
 
         for (let i = this.cats.length; i--; ) {
-          this.cats[i].sprite.animate("idle");
+          this.cats[i].playerSprite.animate();
           // draw shadow and cat
           this.ctx.drawImage(
             this.world.assets.image["shadow"].image,
             this.cats[i].body.position.x,
             this.cats[i].body.position.y + 2
           );
-          this.cats[i].display();
+          this.cats[i].playerSprite.display();
           this.cats[i].translation();
         }
         for (let i = this.effects.length; i--; ) {
@@ -2455,6 +3173,51 @@
           }
         }
       }
+
+      // Add touch support for mobile devices in game
+      inGame.mouseEvents = function (event) {
+        if (!this.userInput) return;
+
+        if (event.type === "touchstart") {
+          this.touchStartX = event.touches[0].clientX;
+          this.touchStartY = event.touches[0].clientY;
+        } else if (event.type === "touchend") {
+          if (this.touchStartX && this.touchStartY) {
+            let touchEndX = event.changedTouches[0].clientX;
+            let touchEndY = event.changedTouches[0].clientY;
+
+            let deltaX = touchEndX - this.touchStartX;
+            let deltaY = touchEndY - this.touchStartY;
+
+            // Minimum swipe distance
+            let minSwipeDistance = 50;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+              // Horizontal swipe
+              if (Math.abs(deltaX) > minSwipeDistance) {
+                if (deltaX > 0) {
+                  this.moveCats(1, 0); // Right
+                } else {
+                  this.moveCats(-1, 0); // Left
+                }
+              }
+            } else {
+              // Vertical swipe
+              if (Math.abs(deltaY) > minSwipeDistance) {
+                if (deltaY > 0) {
+                  this.moveCats(0, 1); // Down
+                } else {
+                  this.moveCats(0, -1); // Up
+                }
+              }
+            }
+
+            // Reset touch coordinates
+            this.touchStartX = null;
+            this.touchStartY = null;
+          }
+        }
+      };
 
       inGame.control = function () {
         if (this.userInput == false) return false;
@@ -2615,11 +3378,23 @@
               }
             );
           } else {
+            // All levels completed - capture final score and reset game
             this.transition.start(
               0,
               Math.max(this.world.W / 2, this.world.H / 2),
               () => {
                 hideHUD();
+                stopAllMusic(); // Stop background music
+                console.log(
+                  "GAME COMPLETED - All levels finished - Final Score:",
+                  gameScore
+                );
+
+                // Reset game to level 1 for next play
+                this.world.current_level = 1;
+                resetGame();
+
+                // Return to menu (menu will start its own music)
                 this.world.startScene("menu");
               }
             );
@@ -2719,7 +3494,19 @@
                     // Check if this was the last cat or if we should trigger game over
                     if (this.scene.cats.length === 0) {
                       // All cats are dead - Game Over
-                      gameOverTimeUp(this.world);
+                      hideHUD();
+                      stopAllMusic(); // Stop background music
+                      console.log(
+                        "GAME OVER - Pirate fell into water - Final Score:",
+                        gameScore
+                      );
+
+                      // Reset game to level 1 for next play
+                      this.world.current_level = 1;
+                      resetGame();
+
+                      // Return to menu (menu will start its own music)
+                      this.world.startScene("menu");
                     } else {
                       this.scene.checkWin();
                     }
@@ -2734,7 +3521,6 @@
                 this.scene.collisionCats();
                 this.applyMove();
               } else {
-                this.world.assets.audio.mouvement.audio.play();
                 // check arrows
                 let current_tile = this.world.getTile(
                   3,
@@ -2846,7 +3632,6 @@
             this.old_position.y === this.target.y
           ) {
             this.canBeControlled = true;
-            this.world.assets.audio.bump.audio.play();
             return false;
           }
           this.lastDirection = new Vector(
@@ -2877,28 +3662,7 @@
           return result;
         }
       }
-      let controls = new Scene("controls");
-      controls.keyEvents = function (event) {
-        if (this.world.keys.KeyE) {
-          this.world.startScene("menu");
-        }
-      };
-      controls.init = function () {
-        this.loop = false;
-        this.controls = this.world.assets.image.controls.image;
-      };
-      controls.render = function () {
-        this.world.clear("black");
-        this.ctx.drawImage(this.controls, 0, 0);
-        // notice
-        this.world.setFont("origami_light");
-        this.world.write(
-          "[E] to exit",
-          this.world.W / 2,
-          this.world.H - 46,
-          "center"
-        );
-      };
+      // Controls scene removed - not needed since we only use Arrow Keys + Space
 
       let game = new Diorama(parameters);
       // global variables
@@ -2907,13 +3671,13 @@
       // the addScene function link the scene with the world (game)
       game.addScene(menu);
       game.addScene(levels);
-      game.addScene(controls);
+      // game.addScene(controls); // Removed - not needed
       game.addScene(inGame);
       game.ready();
       // everything start being loaded now !
       // the ready function must be called last !
-      // Making the game full screen and with a 10% audio volume by default
-      game.soundLevel(0.2);
+      // Making the game full screen and with a softer audio volume by default
+      game.soundLevel(0.1);
       game.fullScreen();
     </script>
   </body>
