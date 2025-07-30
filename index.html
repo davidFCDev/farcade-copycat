@@ -784,6 +784,14 @@
           if (tile === undefined) return false;
           return tile;
         }
+        setTile(layer_id, x, y, tile_id) {
+          if (x < 0 || x > this.terrain.layers[layer_id].size.x - 1)
+            return false;
+          if (y < 0 || y > this.terrain.layers[layer_id].size.y - 1)
+            return false;
+          this.terrain.layers[layer_id].geometry[y][x] = tile_id;
+          return true;
+        }
         findTile(layer_id, tile_id) {
           let layer = this.terrain.layers[layer_id];
           let result = [];
@@ -972,6 +980,36 @@
                   );
 
                   this.ctx.restore();
+                } else if (tile.id == "17") {
+                  // coin tile id - special handling for 32x32 frames
+                  this.ctx.save();
+
+                  // Force smooth rendering for coin
+                  this.ctx.mozImageSmoothingEnabled = true;
+                  this.ctx.webkitImageSmoothingEnabled = true;
+                  this.ctx.msImageSmoothingEnabled = true;
+                  this.ctx.imageSmoothingEnabled = true;
+                  this.ctx.imageSmoothingQuality = "high";
+
+                  // Ensure frame index is always valid (0-7)
+                  let frameIndex = Math.floor(tile.current) % 8;
+                  if (frameIndex < 0) frameIndex = 0;
+                  if (frameIndex > 7) frameIndex = 7;
+
+                  // Draw the coin with correct frame size (32x32 frames)
+                  this.ctx.drawImage(
+                    tile.spritesheet,
+                    frameIndex * 32, // 32px per frame
+                    0,
+                    32, // source width
+                    32, // source height
+                    x,
+                    y,
+                    this.tile_size, // scale to game tile size (16x16)
+                    this.tile_size
+                  );
+
+                  this.ctx.restore();
                 } else {
                   // Normal animated tile rendering
                   this.ctx.drawImage(
@@ -1155,11 +1193,16 @@
             name: "dust_effect",
             path: "https://image.ibb.co/mKy0Mo/dust.png",
           },
+          {
+            type: "img",
+            name: "coin_sprite",
+            path: "https://i.postimg.cc/jdKmMf0V/coin.png",
+          },
           // Audio
           {
             type: "audio",
             name: "jingle",
-            path: "http://www.noiseforfun.com/waves/musical-and-jingles/NFF-bravo.wav",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/waves-bWs1OMPYRpODjTOSXkwhP9CNBPVEMm.mp3?01R0",
           },
           {
             type: "audio",
@@ -1169,7 +1212,12 @@
           {
             type: "audio",
             name: "selection",
-            path: "http://www.noiseforfun.com/waves/interface-and-media/NFF-select.wav",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/exit-Wo1n7ZwfI9XI86Ts2dqx3QfcpWwaw1.mp3?nz0F",
+          },
+          {
+            type: "audio",
+            name: "coin_collect",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/collectcoin-6075-rjrkxbNHSsH3QzqnurDamQrx3K87pQ.mp3?vsYo",
           },
           {
             type: "audio",
@@ -1179,12 +1227,12 @@
           {
             type: "audio",
             name: "eboulement",
-            path: "http://www.noiseforfun.com/waves/action-and-game/NFF-moving-block.wav",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/game-over-eXhbU57XcekmZPntLzuPIn06iXDjbN.mp3?jVoy",
           },
           {
             type: "audio",
             name: "splash",
-            path: "http://www.noiseforfun.com/waves/action-and-game/NFF-mud-splash.wav",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/splash-SOkXu7Zfm7m9DomHSWtNm6we2H9Rwq.mp3?7gjD",
           },
           {
             type: "audio",
@@ -1263,6 +1311,14 @@
           { name: "arrowUp", id: 13, collision: false },
           { name: "arrowRight", id: 14, collision: false },
           { name: "arrowDown", id: 15, collision: false },
+          {
+            name: "coin",
+            id: 17,
+            collision: false,
+            animated: true,
+            spritesheet: "coin_sprite",
+            steps: 0.08,
+          },
         ],
         maps: [
           // map 1
@@ -1309,7 +1365,7 @@
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 11, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 11, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1324,6 +1380,31 @@
                 ],
               },
               // wall layer
+              {
+                name: "wall",
+                offset: {
+                  x: 0,
+                  y: 0,
+                },
+                geometry: [
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+              },
             ],
           },
           // map 2
@@ -1846,6 +1927,18 @@
       };
       menu.init = function () {
         this.init_once = true;
+
+        // Play waves sound on menu start
+        if (
+          this.world.assets.audio.jingle &&
+          this.world.assets.audio.jingle.audio
+        ) {
+          this.world.assets.audio.jingle.audio.currentTime = 0;
+          this.world.assets.audio.jingle.audio.play().catch((e) => {
+            console.log("Could not play jingle audio:", e);
+          });
+        }
+
         // custom data
         this.button = [
           {
@@ -2170,6 +2263,7 @@
             this.addCat(spawn.x, spawn.y);
           });
         };
+
         // effects
         this.effects = [];
         // transition effects
@@ -2257,14 +2351,15 @@
         };
         let spawn_effect = new Effect(this, spawn_data, x, y - 1, () => {
           this.cats.push(cat);
-          this.world.assets.audio.apparition.audio.play();
         });
         spawn_effect.trigger = 4;
         this.effects.push(spawn_effect);
       };
+
       inGame.render = function () {
         this.control();
         this.world.renderMap();
+
         for (let i = this.cats.length; i--; ) {
           this.cats[i].sprite.animate("idle");
           // draw shadow and cat
@@ -2405,6 +2500,65 @@
           });
         }
       };
+
+      inGame.collisionCoins = function () {
+        // Check if cats are on coin tiles
+        this.cats.forEach((cat) => {
+          // Check both layers for coins
+          let tileLayer1 = this.world.getTile(1, cat.target.x, cat.target.y);
+          let tileLayer3 = this.world.getTile(3, cat.target.x, cat.target.y);
+
+          // Check for coin in either layer
+          let coinFound = false;
+          let coinLayer = null;
+
+          if (tileLayer1 && tileLayer1.name === "coin") {
+            coinFound = true;
+            coinLayer = 1;
+          } else if (tileLayer3 && tileLayer3.name === "coin") {
+            coinFound = true;
+            coinLayer = 3;
+          }
+
+          if (coinFound) {
+            // Remove the coin from the map
+            this.world.setTile(coinLayer, cat.target.x, cat.target.y, 0);
+
+            // Remove coin from animated cache to stop rendering
+            let layer = this.world.terrain.layers[coinLayer];
+            if (layer.animated) {
+              layer.animated.forEach((animatedTile) => {
+                if (animatedTile.id == "17") {
+                  // coin tile id
+                  animatedTile.positions = animatedTile.positions.filter(
+                    (pos) => !(pos.x === cat.target.x && pos.y === cat.target.y)
+                  );
+                }
+              });
+            }
+
+            // Add bonus points for collecting coin
+            gameScore += 100;
+            updateHUD();
+
+            // Play coin collection sound
+            if (
+              this.world.assets.audio.coin_collect &&
+              this.world.assets.audio.coin_collect.audio
+            ) {
+              try {
+                this.world.assets.audio.coin_collect.audio.currentTime = 0;
+                this.world.assets.audio.coin_collect.audio.play().catch((e) => {
+                  console.log("Could not play coin collection sound:", e);
+                });
+              } catch (error) {
+                console.log("Error playing coin sound:", error);
+              }
+            }
+          }
+        });
+      };
+
       inGame.checkWin = function () {
         if (this.cats.length === 0) {
           // everyone is dead :/
@@ -2428,7 +2582,22 @@
         ) {
           this.won = true;
 
-          this.world.assets.audio.jingle.audio.play();
+          // Play completion sound with error handling
+          if (
+            this.world.assets.audio.selection &&
+            this.world.assets.audio.selection.audio
+          ) {
+            try {
+              this.world.assets.audio.selection.audio.currentTime = 0;
+              this.world.assets.audio.selection.audio.play().catch((e) => {
+                console.log("Could not play selection audio:", e);
+              });
+            } catch (error) {
+              console.log("Error playing completion sound:", error);
+            }
+          } else {
+            console.log("Selection audio not available");
+          }
 
           // Level completed - calculate and add score
           levelCompleted(this.world);
@@ -2598,6 +2767,7 @@
               }
               // check if we won when a cat finish a step
               this.scene.checkWin();
+              this.scene.collisionCoins(); // Check for coin collection after movement
             }
           }
         }
