@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <title>Opensea Drop</title>
+    <!-- Farcade SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@farcade/game-sdk@latest/dist/index.min.js"></script>
     <!-- Google Fonts - Pirate/Adventure Style Font -->
     <link
       href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Creepster&family=Jolly+Lodger&display=swap"
@@ -38,50 +40,245 @@
         image-rendering: pixelated;
         image-rendering: -moz-crisp-edges;
         image-rendering: crisp-edges;
+        touch-action: none; /* Disable default touch behaviors */
+        user-select: none; /* Prevent text selection on touch */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
       }
 
-      /* HUD Styles - Simple text row without background */
+      /* Touch feedback for mobile */
+      .touch-feedback {
+        position: fixed;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(255, 215, 0, 0.3);
+        border: 2px solid rgba(255, 215, 0, 0.6);
+        pointer-events: none;
+        z-index: 999;
+        transform: translate(-50%, -50%);
+        animation: touchFeedback 0.3s ease-out;
+        display: none;
+      }
+
+      @keyframes touchFeedback {
+        0% {
+          transform: translate(-50%, -50%) scale(0.5);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      /* Menu Play Button Overlay */
+      #menuPlayButton {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -25%);
+        background: transparent;
+        border: none;
+        color: #ffd700;
+        font-family: "Pirata One", sans-serif;
+        font-size: 36px;
+        text-shadow: 3px 3px 0px #8b4513;
+        cursor: pointer;
+        padding: 15px 30px;
+        z-index: 1000;
+        display: none; /* Hidden by default */
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        /* Ensure it's above canvas */
+        pointer-events: auto;
+        /* Add pulsing animation similar to the original */
+        animation: playButtonPulse 3s ease-in-out infinite;
+      }
+
+      @keyframes playButtonPulse {
+        0% {
+          color: #b8860b;
+          text-shadow: 2px 2px 0px #2f1b14;
+        }
+        50% {
+          color: #ffd700;
+          text-shadow: 3px 3px 0px #8b4513;
+        }
+        100% {
+          color: #b8860b;
+          text-shadow: 2px 2px 0px #2f1b14;
+        }
+      }
+
+      #menuPlayButton:active {
+        transform: translate(-50%, -25%) scale(0.95);
+        color: #b8860b;
+        text-shadow: 2px 2px 0px #2f1b14;
+        animation: none; /* Stop pulsing when pressed */
+      }
+
+      /* HUD Styles - Responsive HTML elements */
       #gameHUD {
         position: fixed;
-        top: 70px;
-        left: 50%;
-        transform: translateX(-50%);
+        top: 25px;
+        left: 10px;
+        right: 10px;
         display: none;
         z-index: 1000;
+        pointer-events: none;
+      }
+
+      .hud-container {
+        display: flex;
+        justify-content: center;
+        gap: 80px;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 20px;
+        box-sizing: border-box;
+      }
+
+      .hud-left {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hud-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .score-display,
+      .timer-display {
+        font-family: "Pirata One", serif;
+        font-size: clamp(20px, 6vw, 40px);
+        color: #ffffff;
+        text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
+        margin: 5px 0;
+        line-height: 1;
+      }
+
+      .surrender-button {
+        background: url("https://i.postimg.cc/KYTPr4CY/redbutton.png") no-repeat
+          center;
+        background-size: contain;
+        width: clamp(45px, 10vw, 70px);
+        height: clamp(45px, 10vw, 70px);
+        border: none;
+        cursor: pointer;
+        pointer-events: auto;
+        transition: transform 0.1s;
+        margin-top: 7px;
+      }
+
+      .surrender-button:hover {
+        transform: scale(1.1);
+      }
+
+      .surrender-button:active {
+        transform: scale(0.95);
       }
 
       #hudCanvas {
-        display: block;
-        background: transparent;
+        display: none;
       }
 
-      /* Hints Styles - Bottom hints area */
+      /* Hints Styles - Responsive HTML elements */
       #gameHints {
         position: fixed;
-        bottom: 150px;
+        bottom: 40px;
         left: 50%;
         transform: translateX(-50%);
         display: none;
         z-index: 1000;
+        pointer-events: none;
+      }
+
+      .hints-container {
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        padding: 15px 25px;
+        max-width: 95vw;
+        text-align: center;
+        overflow: hidden;
+      }
+
+      .hint-text {
+        font-family: "Pirata One", serif;
+        font-size: clamp(20px, 5vw, 40px);
+        color: #ffffff;
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
+        margin: 0;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .hint-text.visible {
+        opacity: 1;
       }
 
       #hintsCanvas {
-        display: block;
-        background: transparent;
+        display: none;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 600px) {
+        .hud-container {
+          padding: 0 10px;
+        }
+
+        .hints-container {
+          padding: 10px 15px;
+          margin: 0 10px;
+        }
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@farcade/game-sdk@latest/dist/index.min.js"></script>
   </head>
   <body>
-    <!-- Game HUD - Score and Timer in column without background -->
+    <!-- Game HUD - Score, Timer and Surrender Button -->
     <div id="gameHUD">
-      <canvas id="hudCanvas" width="800" height="200"></canvas>
+      <div class="hud-container">
+        <div class="hud-left">
+          <div class="score-display">Score: <span id="scoreValue">0</span></div>
+          <div class="timer-display">Time: <span id="timerValue">30</span></div>
+        </div>
+        <div class="hud-right">
+          <button
+            class="surrender-button"
+            id="surrenderBtn"
+            title="Surrender"
+          ></button>
+        </div>
+      </div>
     </div>
 
     <!-- Game Hints - Rotating hints at bottom -->
     <div id="gameHints">
-      <canvas id="hintsCanvas" width="800" height="120"></canvas>
+      <div class="hints-container">
+        <p class="hint-text" id="hintText">Take all the coins, or not...</p>
+      </div>
     </div>
+
+    <!-- Menu Play Button Overlay -->
+    <button id="menuPlayButton">PLAY</button>
+
+    <!-- Touch feedback indicator -->
+    <div id="touchFeedback" class="touch-feedback"></div>
 
     <script>
       // ----------
@@ -796,14 +993,33 @@
             (event) => this.mouseEvent(event),
             false
           );
+
+          // Add swipe gesture support for mobile movement
           this.canvas.addEventListener(
-            "touchend",
-            (event) => {
-              event.preventDefault();
-              this.mouseEvent(event);
-            },
+            "touchstart",
+            (event) => this.touchStart(event),
             false
           );
+          this.canvas.addEventListener(
+            "touchmove",
+            (event) => this.touchMove(event),
+            false
+          );
+          this.canvas.addEventListener(
+            "touchend",
+            (event) => this.touchEnd(event),
+            false
+          );
+
+          // Touch tracking variables
+          this.touchStartX = 0;
+          this.touchStartY = 0;
+          this.touchEndX = 0;
+          this.touchEndY = 0;
+          this.minSwipeDistance = 20; // Reduced from 30 to 20 for more sensitive swipes
+          this.holdTimer = null;
+          this.continuousTimer = null;
+          this.isHolding = false;
         }
         keyDown(event) {
           event.preventDefault();
@@ -814,6 +1030,306 @@
         keyUp(event) {
           event.preventDefault();
           this.keys[event.code] = false;
+        }
+
+        // Touch event handlers for improved mobile controls
+        touchStart(event) {
+          event.preventDefault();
+          const touch = event.touches[0];
+          this.touchStartX = touch.clientX;
+          this.touchStartY = touch.clientY;
+          this.touchStartTime = Date.now();
+          this.isHolding = false;
+          this.lastMoveTime = 0;
+          this.moveRepeatDelay = 150; // Reduced from 200ms - faster initial response
+          this.moveRepeatRate = 120; // Reduced from 150ms - faster continuous movement
+
+          // Show touch feedback
+          this.showTouchFeedback(this.touchStartX, this.touchStartY);
+
+          // Start hold detection timer
+          this.holdTimer = setTimeout(() => {
+            this.isHolding = true;
+            this.startContinuousMovement();
+          }, 150); // Reduced from 200ms - start continuous movement faster
+
+          console.log("Touch start:", this.touchStartX, this.touchStartY);
+        }
+
+        showTouchFeedback(x, y) {
+          const feedback = document.getElementById("touchFeedback");
+          if (feedback) {
+            feedback.style.left = x + "px";
+            feedback.style.top = y + "px";
+            feedback.style.display = "block";
+
+            // Hide after animation
+            setTimeout(() => {
+              feedback.style.display = "none";
+            }, 300);
+          }
+        }
+
+        touchMove(event) {
+          event.preventDefault();
+
+          // If holding and moving, update the direction
+          if (this.isHolding && event.touches[0]) {
+            const touch = event.touches[0];
+            this.currentTouchX = touch.clientX;
+            this.currentTouchY = touch.clientY;
+          }
+        }
+
+        touchEnd(event) {
+          event.preventDefault();
+
+          // Clear hold timer and continuous movement
+          if (this.holdTimer) {
+            clearTimeout(this.holdTimer);
+            this.holdTimer = null;
+          }
+
+          if (this.continuousTimer) {
+            clearInterval(this.continuousTimer);
+            this.continuousTimer = null;
+          }
+
+          if (!event.changedTouches) return;
+
+          const touch = event.changedTouches[0];
+          this.touchEndX = touch.clientX;
+          this.touchEndY = touch.clientY;
+          const touchDuration = Date.now() - this.touchStartTime;
+
+          console.log(
+            "Touch end:",
+            this.touchEndX,
+            this.touchEndY,
+            "Duration:",
+            touchDuration
+          );
+
+          // If it was a quick tap (not a hold), handle as single movement
+          if (!this.isHolding && touchDuration < 200) {
+            // Check if it's a swipe or a tap
+            const deltaX = this.touchEndX - this.touchStartX;
+            const deltaY = this.touchEndY - this.touchStartY;
+            const swipeDistance = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+
+            if (swipeDistance >= this.minSwipeDistance) {
+              // It's a swipe - handle movement
+              this.handleSwipe();
+            } else {
+              // It's a tap - check for virtual buttons or handle as click
+              if (this.current_scene && this.current_scene.name === "inGame") {
+                this.handleVirtualButtons(this.touchEndX, this.touchEndY);
+              } else {
+                // Handle as click for menus and buttons
+                this.mouseEvent(event);
+              }
+            }
+          }
+
+          // Reset touch state
+          this.isHolding = false;
+          this.currentTouchX = null;
+          this.currentTouchY = null;
+        }
+
+        startContinuousMovement() {
+          if (this.continuousTimer) {
+            clearInterval(this.continuousTimer);
+          }
+
+          // Immediate first move
+          this.handleContinuousMove();
+
+          // Set up continuous movement
+          this.continuousTimer = setInterval(() => {
+            if (this.isHolding) {
+              this.handleContinuousMove();
+            } else {
+              clearInterval(this.continuousTimer);
+              this.continuousTimer = null;
+            }
+          }, this.moveRepeatRate);
+        }
+
+        handleContinuousMove() {
+          if (
+            !this.isHolding ||
+            !this.current_scene ||
+            this.current_scene.name !== "inGame"
+          ) {
+            return;
+          }
+
+          // Use current touch position if available, otherwise use start position
+          const currentX = this.currentTouchX || this.touchStartX;
+          const currentY = this.currentTouchY || this.touchStartY;
+
+          const deltaX = currentX - this.touchStartX;
+          const deltaY = currentY - this.touchStartY;
+          const absDeltaX = Math.abs(deltaX);
+          const absDeltaY = Math.abs(deltaY);
+
+          // Determine direction based on touch position or initial swipe
+          let moveX = 0,
+            moveY = 0;
+
+          if (absDeltaX > absDeltaY && absDeltaX > 30) {
+            // Horizontal movement
+            moveX = deltaX > 0 ? 1 : -1;
+          } else if (absDeltaY > 30) {
+            // Vertical movement
+            moveY = deltaY > 0 ? 1 : -1;
+          } else {
+            // If no clear direction from drag, use screen zones
+            this.handleVirtualButtons(currentX, currentY);
+            return;
+          }
+
+          // Execute movement
+          if (moveX !== 0 || moveY !== 0) {
+            console.log("Continuous move:", moveX, moveY);
+            this.current_scene.moveCats(moveX, moveY);
+          }
+        }
+
+        handleVirtualButtons(x, y) {
+          // Get canvas dimensions
+          const rect = this.canvas.getBoundingClientRect();
+          const canvasWidth = rect.width;
+          const canvasHeight = rect.height;
+
+          // Define virtual button areas with improved zones
+          const cornerSize = 0.3; // 30% for corner zones (increased from 25%)
+          const centerDeadZone = 0.2; // 20% dead zone in center to avoid accidental moves
+
+          // Calculate center bounds
+          const centerLeft = canvasWidth * ((1 - centerDeadZone) / 2);
+          const centerRight = canvasWidth * ((1 + centerDeadZone) / 2);
+          const centerTop = canvasHeight * ((1 - centerDeadZone) / 2);
+          const centerBottom = canvasHeight * ((1 + centerDeadZone) / 2);
+
+          // Skip movement if in center dead zone
+          if (
+            x > centerLeft &&
+            x < centerRight &&
+            y > centerTop &&
+            y < centerBottom
+          ) {
+            console.log("Touch in center dead zone - no movement");
+            return;
+          }
+
+          // Determine movement based on which zone is most prominent
+          const distanceToLeft = x;
+          const distanceToRight = canvasWidth - x;
+          const distanceToTop = y;
+          const distanceToBottom = canvasHeight - y;
+
+          // Find the minimum distance to determine primary direction
+          const minDistance = Math.min(
+            distanceToLeft,
+            distanceToRight,
+            distanceToTop,
+            distanceToBottom
+          );
+
+          // Only move if we're clearly in a direction zone
+          const threshold = canvasWidth * 0.15; // Must be within 15% of edge
+
+          if (minDistance > threshold) {
+            console.log("Touch too far from edges - no movement");
+            return;
+          }
+
+          // Execute movement based on closest edge
+          if (minDistance === distanceToTop) {
+            console.log("Virtual up button pressed - distance:", minDistance);
+            this.current_scene.moveCats(0, -1);
+          } else if (minDistance === distanceToBottom) {
+            console.log("Virtual down button pressed - distance:", minDistance);
+            this.current_scene.moveCats(0, 1);
+          } else if (minDistance === distanceToLeft) {
+            console.log("Virtual left button pressed - distance:", minDistance);
+            this.current_scene.moveCats(-1, 0);
+          } else if (minDistance === distanceToRight) {
+            console.log(
+              "Virtual right button pressed - distance:",
+              minDistance
+            );
+            this.current_scene.moveCats(1, 0);
+          }
+        }
+        handleSwipe() {
+          const deltaX = this.touchEndX - this.touchStartX;
+          const deltaY = this.touchEndY - this.touchStartY;
+          const absDeltaX = Math.abs(deltaX);
+          const absDeltaY = Math.abs(deltaY);
+
+          console.log("Swipe detected:", {
+            deltaX,
+            deltaY,
+            absDeltaX,
+            absDeltaY,
+            minDistance: this.minSwipeDistance,
+            scene: this.current_scene?.name,
+          });
+
+          // Check if it's a valid swipe (minimum distance)
+          if (Math.max(absDeltaX, absDeltaY) < this.minSwipeDistance) {
+            console.log("Swipe too small, ignoring");
+            return;
+          }
+
+          // Only handle swipes during inGame scene
+          if (!this.current_scene || this.current_scene.name !== "inGame") {
+            console.log("Not in inGame scene, ignoring swipe");
+            return;
+          }
+
+          // Determine swipe direction and move cats directly
+          if (absDeltaX > absDeltaY) {
+            // Horizontal swipe
+            if (deltaX > 0) {
+              // Swipe right
+              console.log("Moving right");
+              this.current_scene.moveCats(1, 0);
+            } else {
+              // Swipe left
+              console.log("Moving left");
+              this.current_scene.moveCats(-1, 0);
+            }
+          } else {
+            // Vertical swipe
+            if (deltaY > 0) {
+              // Swipe down
+              console.log("Moving down");
+              this.current_scene.moveCats(0, 1);
+            } else {
+              // Swipe up
+              console.log("Moving up");
+              this.current_scene.moveCats(0, -1);
+            }
+          }
+        }
+
+        simulateKeyPress(keyCode) {
+          // Create and dispatch the keydown event to the current scene
+          const keyDownEvent = new KeyboardEvent("keydown", {
+            code: keyCode,
+            key: keyCode.replace("Arrow", "Arrow"),
+            bubbles: true,
+            cancelable: true,
+          });
+
+          // Call the scene's keyEvents function
+          if (this.current_scene && this.current_scene.keyEvents) {
+            this.current_scene.keyEvents(keyDownEvent);
+          }
         }
 
         mouseEvent(event) {
@@ -1941,6 +2457,306 @@
               }, // wall layer
             ],
           },
+
+          {
+            name: "map_9",
+            tileset: "demo_tileset",
+            // Water Maze Challenge - Single Pirate
+            layers: [
+              // ground layer - crear un laberinto con caminos de tierra rodeados de agua
+              {
+                name: "ground",
+                offset: {
+                  x: 0,
+                  y: 4,
+                },
+                geometry: [
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 3, 0, 3, 3, 0, 0, 3, 3, 3, 3, 0, 0, 3, 0, 0],
+                  [0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0],
+                  [0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 0],
+                  [0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0],
+                  [0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 3, 0],
+                  [0, 0, 3, 0, 0, 3, 3, 3, 3, 0, 0, 3, 0, 0, 3, 0],
+                  [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+                  [0, 3, 0, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 0, 0],
+                  [0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0],
+                  [0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0],
+                  [0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+              },
+              // coins y spawn/exit - distribuir monedas estratégicamente por el laberinto
+              {
+                name: "onGround",
+                offset: {
+                  x: 0,
+                  y: 0,
+                },
+                geometry: [
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 7, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 17, 0, 0],
+                  [0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0],
+                  [0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 17, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0],
+                  [0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 8, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+              }, // coins layer
+            ],
+          },
+
+          {
+            name: "map_10",
+            tileset: "demo_tileset",
+            // Horizontal Twin Pirate Challenge - Ice & Earth Adventure
+            layers: [
+              // ground layer - todo terreno sólido, sin agua (basado en map_6)
+              {
+                name: "ground",
+                offset: {
+                  x: 0,
+                  y: 4,
+                },
+                geometry: [
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                ],
+              },
+              // rutas horizontales separadas con obstáculos (NIVEL EXTREMO)
+              {
+                name: "onGround",
+                offset: {
+                  x: 0,
+                  y: 0,
+                },
+                geometry: [
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 7, 6, 6, 5, 6, 6, 6, 11, 6, 6, 5, 6, 6, 6, 4],
+                  [4, 6, 6, 6, 17, 6, 5, 6, 6, 6, 11, 6, 6, 5, 6, 4],
+                  [4, 5, 6, 6, 6, 11, 6, 6, 6, 6, 6, 6, 11, 6, 6, 4],
+                  [4, 6, 6, 5, 6, 6, 6, 11, 6, 6, 5, 6, 6, 8, 6, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 6, 6, 11, 6, 6, 5, 6, 6, 6, 11, 6, 6, 5, 6, 4],
+                  [4, 17, 6, 6, 6, 11, 6, 6, 5, 6, 6, 6, 11, 6, 6, 4],
+                  [4, 8, 5, 6, 6, 6, 6, 17, 6, 5, 6, 6, 6, 6, 7, 4],
+                  [4, 6, 6, 6, 11, 6, 6, 5, 6, 6, 6, 11, 6, 6, 5, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                ],
+              }, // obstacles layer
+            ],
+          },
+
+          {
+            name: "map_11",
+            tileset: "demo_tileset",
+            // Ice Sliding Puzzle - Inspirado en Chip's Challenge + Lolo
+            layers: [
+              // ground layer - todo terreno sólido
+              {
+                name: "ground",
+                offset: {
+                  x: 0,
+                  y: 4,
+                },
+                geometry: [
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                ],
+              },
+              // Ice sliding puzzle con arbustos como frenos
+              {
+                name: "onGround",
+                offset: {
+                  x: 0,
+                  y: 0,
+                },
+                geometry: [
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 7, 6, 6, 6, 5, 6, 6, 6, 6, 5, 6, 6, 17, 8, 4],
+                  [4, 4, 4, 4, 6, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4],
+                  [4, 17, 6, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 17, 6, 4],
+                  [4, 4, 4, 5, 6, 4, 4, 4, 4, 6, 5, 4, 4, 4, 4, 4],
+                  [4, 6, 6, 6, 6, 6, 17, 6, 6, 6, 6, 6, 6, 6, 17, 4],
+                  [4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4],
+                  [4, 5, 6, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 6, 5, 4],
+                  [4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4],
+                  [4, 17, 6, 6, 6, 6, 6, 17, 6, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 4, 4, 5, 6, 4, 4, 4, 4, 6, 5, 4, 4, 4, 4, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 17, 6, 4],
+                  [4, 4, 4, 4, 6, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4],
+                  [4, 17, 6, 6, 6, 5, 6, 6, 6, 6, 5, 6, 6, 17, 6, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                ],
+              }, // ice sliding layer
+            ],
+          },
+
+          {
+            name: "map_12",
+            tileset: "demo_tileset",
+            // Water Maze Advanced - Inspirado en Sokoban + decisiones sin retorno
+            layers: [
+              // ground layer - islas conectadas por puentes
+              {
+                name: "ground",
+                offset: {
+                  x: 0,
+                  y: 4,
+                },
+                geometry: [
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0],
+                  [0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0],
+                  [0, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 0, 0],
+                  [0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
+                  [0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
+                  [0, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0],
+                  [0, 3, 3, 3, 0, 3, 3, 3, 3, 3, 0, 3, 3, 3, 0, 0],
+                  [0, 3, 3, 3, 0, 0, 0, 3, 0, 0, 0, 3, 3, 3, 0, 0],
+                  [0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0],
+                  [0, 0, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 3, 0, 0, 0],
+                  [0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0],
+                  [0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0],
+                  [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],
+                  [0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+              },
+              // Spawn, exit, monedas y puntos de decisión críticos
+              {
+                name: "onGround",
+                offset: {
+                  x: 0,
+                  y: 0,
+                },
+                geometry: [
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 7, 17, 0, 0, 0, 0, 17, 0, 0, 0, 17, 0, 8, 0, 0],
+                  [0, 0, 5, 0, 0, 0, 5, 0, 5, 0, 0, 0, 5, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0],
+                  [0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 17, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0],
+                  [0, 17, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 17, 0, 0],
+                  [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 17, 0, 0, 5, 0, 5, 0, 0, 17, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 17, 0, 0, 0, 0, 5, 0, 0, 0, 0, 17, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ],
+              }, // islands puzzle layer
+            ],
+          },
+
+          {
+            name: "map_13",
+            tileset: "demo_tileset",
+            // Twin Coordination Challenge - Inspirado en Lemmings
+            layers: [
+              // ground layer - terreno sólido para coordinación perfecta
+              {
+                name: "ground",
+                offset: {
+                  x: 0,
+                  y: 4,
+                },
+                geometry: [
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                ],
+              },
+              // Coordinación perfecta - timing crítico entre ambos piratas
+              {
+                name: "onGround",
+                offset: {
+                  x: 0,
+                  y: 0,
+                },
+                geometry: [
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 7, 6, 6, 5, 6, 6, 17, 6, 6, 5, 6, 6, 17, 8, 4],
+                  [4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4],
+                  [4, 4, 4, 6, 4, 17, 6, 6, 6, 17, 4, 6, 4, 4, 4, 4],
+                  [4, 4, 4, 6, 4, 6, 4, 5, 4, 6, 4, 6, 4, 4, 4, 4],
+                  [4, 17, 6, 6, 6, 6, 4, 6, 4, 6, 6, 6, 6, 6, 17, 4],
+                  [4, 4, 4, 5, 4, 6, 4, 6, 4, 6, 4, 5, 4, 4, 4, 4],
+                  [4, 4, 4, 6, 4, 6, 6, 6, 6, 6, 4, 6, 4, 4, 4, 4],
+                  [4, 4, 4, 6, 4, 4, 4, 17, 4, 4, 4, 6, 4, 4, 4, 4],
+                  [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4],
+                  [4, 4, 4, 5, 4, 4, 4, 11, 4, 4, 4, 5, 4, 4, 4, 4],
+                  [4, 17, 6, 6, 6, 6, 4, 6, 4, 6, 6, 6, 6, 6, 17, 4],
+                  [4, 4, 4, 6, 4, 6, 4, 5, 4, 6, 4, 6, 4, 4, 4, 4],
+                  [4, 4, 4, 6, 4, 17, 6, 6, 6, 17, 4, 6, 4, 4, 4, 4],
+                  [4, 7, 6, 6, 5, 6, 6, 17, 6, 6, 5, 6, 6, 17, 8, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                ],
+              }, // twin coordination layer
+            ],
+          },
         ],
       };
 
@@ -2029,10 +2845,9 @@
       let levelTime = 30;
       let timerInterval = null;
       let showHUD_flag = false;
-      let hudCanvasCtx = null;
       const BASE_POINTS_PER_LEVEL = 100;
 
-      // Surrender button variables
+      // Surrender button variables (legacy - no longer used for positioning)
       let surrenderButtonX = 650;
       let surrenderButtonY = 100;
       let surrenderButtonSize = 160;
@@ -2041,15 +2856,17 @@
         showHUD_flag = true;
         document.getElementById("gameHUD").style.display = "block";
 
-        // Initialize canvas context for HUD
-        if (!hudCanvasCtx) {
-          hudCanvasCtx = document.getElementById("hudCanvas").getContext("2d");
-          hudCanvasCtx.imageSmoothingEnabled = false;
-
-          // Add event listeners for surrender button
-          const hudCanvas = document.getElementById("hudCanvas");
-          hudCanvas.addEventListener("click", handleHUDClick);
-          hudCanvas.addEventListener("touchend", handleHUDClick);
+        // Add event listener for surrender button (only once)
+        const surrenderBtn = document.getElementById("surrenderBtn");
+        if (surrenderBtn && !surrenderBtn.hasAttribute("data-listener-added")) {
+          surrenderBtn.addEventListener("click", function () {
+            // Farcade SDK: Haptic feedback for surrender button
+            if (window.FarcadeSDK) {
+              window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
+            }
+            surrenderGame(game);
+          });
+          surrenderBtn.setAttribute("data-listener-added", "true");
         }
 
         // Also show hints during gameplay
@@ -2079,85 +2896,26 @@
       }
 
       function updateHUD() {
-        if (!hudCanvasCtx) return;
-
-        // Clear canvas - now wider to accommodate larger scores
-        hudCanvasCtx.clearRect(0, 0, 800, 200);
-
-        // Render Score and Timer with pirate-style fonts
-        let scoreText = "Score: " + gameScore;
-        let timerText = "Time: " + levelTime;
-
-        // Set text properties - Pirate style with even larger size
-        hudCanvasCtx.font = "bold 56px 'Pirata One', 'Jolly Lodger', serif";
-        hudCanvasCtx.textAlign = "center";
-        hudCanvasCtx.textBaseline = "middle";
-
-        // Draw Score with enhanced shadow for pirate aesthetic
-        hudCanvasCtx.fillStyle = "rgba(0, 0, 0, 0.8)";
-        hudCanvasCtx.fillText(scoreText, 403, 53); // Stronger shadow offset
-
-        hudCanvasCtx.fillStyle = "#ffffff";
-        hudCanvasCtx.fillText(scoreText, 400, 50);
-
-        // Draw Timer with color based on time remaining
-        let timerColor = levelTime <= 10 ? "#ff4444" : "#ffffff"; // Red when low time
-        let shadowColor =
-          levelTime <= 10 ? "rgba(255, 0, 0, 0.8)" : "rgba(0, 0, 0, 0.8)";
-
-        hudCanvasCtx.fillStyle = shadowColor;
-        hudCanvasCtx.fillText(timerText, 403, 153); // Stronger shadow offset
-
-        hudCanvasCtx.fillStyle = timerColor;
-        hudCanvasCtx.fillText(timerText, 400, 150);
-
-        // Draw Surrender Button
-        if (
-          game &&
-          game.assets &&
-          game.assets.image &&
-          game.assets.image.surrender_button
-        ) {
-          let buttonImage = game.assets.image.surrender_button.image;
-          if (buttonImage && buttonImage.complete) {
-            // Draw the red button image
-            hudCanvasCtx.drawImage(
-              buttonImage,
-              surrenderButtonX - surrenderButtonSize / 2,
-              surrenderButtonY - surrenderButtonSize / 2,
-              surrenderButtonSize,
-              surrenderButtonSize
-            );
-          }
+        // Update score display
+        const scoreElement = document.getElementById("scoreValue");
+        if (scoreElement) {
+          scoreElement.textContent = gameScore;
         }
-      }
 
-      // Function to handle HUD clicks (surrender button)
-      function handleHUDClick(event) {
-        if (!showHUD_flag || !hudCanvasCtx) return;
+        // Update timer display with color based on time remaining
+        const timerElement = document.getElementById("timerValue");
+        const timerDisplay = document.querySelector(".timer-display");
+        if (timerElement && timerDisplay) {
+          timerElement.textContent = levelTime;
 
-        let rect = document.getElementById("hudCanvas").getBoundingClientRect();
-        let x =
-          (event.clientX ||
-            (event.touches && event.touches[0]
-              ? event.touches[0].clientX
-              : event.changedTouches[0].clientX)) - rect.left;
-        let y =
-          (event.clientY ||
-            (event.touches && event.touches[0]
-              ? event.touches[0].clientY
-              : event.changedTouches[0].clientY)) - rect.top;
-
-        // Scale coordinates to canvas resolution
-        x = x * (800 / rect.width);
-        y = y * (200 / rect.height);
-
-        // Check if click is on surrender button
-        let distance = Math.sqrt(
-          Math.pow(x - surrenderButtonX, 2) + Math.pow(y - surrenderButtonY, 2)
-        );
-        if (distance <= surrenderButtonSize / 2) {
-          surrenderGame(game);
+          // Change color when time is low
+          if (levelTime <= 10) {
+            timerDisplay.style.color = "#ff4444";
+            timerDisplay.style.textShadow = "3px 3px 0px rgba(255, 0, 0, 0.8)";
+          } else {
+            timerDisplay.style.color = "#ffffff";
+            timerDisplay.style.textShadow = "3px 3px 0px rgba(0, 0, 0, 0.8)";
+          }
         }
       }
 
@@ -2199,6 +2957,11 @@
         gameScore += levelPoints;
         updateScore();
 
+        // Farcade SDK: Haptic feedback for level completion
+        if (window.FarcadeSDK) {
+          window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
+        }
+
         // Keep HUD visible for a moment to show final score
         // Don't hide HUD here - let the transition handle it
 
@@ -2212,9 +2975,20 @@
         // Capture final score for SDK integration later
         console.log("GAME OVER - Final Score:", gameScore);
 
+        // Farcade SDK: Report game over with score
+        if (window.FarcadeSDK) {
+          window.FarcadeSDK.singlePlayer.actions.gameOver({ score: gameScore });
+        }
+
         // Reset game to level 1 for next play
         gameWorld.current_level = 1;
         resetGame();
+
+        // Show the HTML Play button when returning to menu
+        const menuPlayButton = document.getElementById("menuPlayButton");
+        if (menuPlayButton) {
+          menuPlayButton.style.display = "block";
+        }
 
         // Return to menu (menu will start its own music)
         gameWorld.startScene("menu");
@@ -2227,9 +3001,20 @@
         // Capture final score for SDK integration later
         console.log("GAME OVER - Player Surrendered - Final Score:", gameScore);
 
+        // Farcade SDK: Report game over with score
+        if (window.FarcadeSDK) {
+          window.FarcadeSDK.singlePlayer.actions.gameOver({ score: gameScore });
+        }
+
         // Reset game to level 1 for next play
         gameWorld.current_level = 1;
         resetGame();
+
+        // Show the HTML Play button when returning to menu
+        const menuPlayButton = document.getElementById("menuPlayButton");
+        if (menuPlayButton) {
+          menuPlayButton.style.display = "block";
+        }
 
         // Return to menu (menu will start its own music)
         gameWorld.startScene("menu");
@@ -2242,11 +3027,7 @@
       }
 
       // ========== HINTS SYSTEM ==========
-      let hintsCanvasCtx = null;
       let currentHintIndex = 0;
-      let hintOpacity = 0;
-      let hintFadeDirection = 1; // 1 for fade in, -1 for fade out
-      let hintDisplayTime = 0;
       let hintInterval = null;
       let showHints_flag = false;
 
@@ -2258,6 +3039,7 @@
         "Coins give you more points...",
         "Aye, aye, Captain!",
         "🔴 Use red button to surrender (S key)",
+        "📱 Swipe on screen to move (mobile)",
       ];
 
       const HINT_FADE_SPEED = 0.02;
@@ -2266,20 +3048,13 @@
 
       function showHints() {
         showHints_flag = true;
+        console.log("Showing hints - setting display block");
         document.getElementById("gameHints").style.display = "block";
 
-        // Initialize canvas context for hints
-        if (!hintsCanvasCtx) {
-          hintsCanvasCtx = document
-            .getElementById("hintsCanvas")
-            .getContext("2d");
-          hintsCanvasCtx.imageSmoothingEnabled = false;
-
-          // First time setup - start from beginning
+        // Start hint rotation if not already running
+        if (!hintInterval) {
+          console.log("Starting hint rotation");
           startHintRotation();
-        } else {
-          // Continue from where we left off
-          continueHintRotation();
         }
       }
 
@@ -2292,11 +3067,12 @@
           hintInterval = null;
         }
 
-        // Don't reset hint state - keep continuity between levels
-        // Only reset animation state, preserve currentHintIndex
-        hintOpacity = 0;
-        hintFadeDirection = 1;
-        hintDisplayTime = 0;
+        // Reset hint state
+        currentHintIndex = 0;
+        const hintElement = document.getElementById("hintText");
+        if (hintElement) {
+          hintElement.classList.remove("visible");
+        }
       }
 
       function startHintRotation() {
@@ -2304,95 +3080,40 @@
           clearInterval(hintInterval);
         }
 
-        // First time initialization only
-        currentHintIndex = 0;
-        hintOpacity = 0;
-        hintFadeDirection = 1;
-        hintDisplayTime = Date.now();
+        // Show first hint immediately
+        displayCurrentHint();
 
-        // Update hints every 50ms for smooth animation
+        // Set up interval for hint rotation
         hintInterval = setInterval(() => {
-          updateHints();
-        }, 50);
+          const hintElement = document.getElementById("hintText");
+          if (hintElement) {
+            // Fade out current hint
+            hintElement.classList.remove("visible");
+
+            // After fade transition, change text and fade in
+            setTimeout(() => {
+              currentHintIndex = (currentHintIndex + 1) % gameHints.length;
+              displayCurrentHint();
+            }, 300); // Match CSS transition duration
+          }
+        }, HINT_DISPLAY_DURATION);
       }
 
-      function continueHintRotation() {
-        if (hintInterval) {
-          clearInterval(hintInterval);
-        }
+      function displayCurrentHint() {
+        const hintElement = document.getElementById("hintText");
+        console.log("displayCurrentHint called", {
+          hintElement: !!hintElement,
+          currentHintIndex,
+          hint: gameHints[currentHintIndex],
+        });
 
-        // Continue from exactly where we left off
-        hintDisplayTime = Date.now();
-        hintOpacity = 0;
-        hintFadeDirection = 1;
-
-        // Update hints every 50ms for smooth animation
-        hintInterval = setInterval(() => {
-          updateHints();
-        }, 50);
-      }
-
-      function updateHints() {
-        if (!showHints_flag) return;
-
-        const currentTime = Date.now();
-        const timeSinceStart = currentTime - hintDisplayTime;
-
-        // Handle fade in
-        if (hintFadeDirection === 1) {
-          hintOpacity += HINT_FADE_SPEED;
-          if (hintOpacity >= 1) {
-            hintOpacity = 1;
-            hintFadeDirection = 0; // Hold at full opacity
-          }
-        }
-        // Handle hold phase
-        else if (hintFadeDirection === 0) {
-          if (timeSinceStart >= HINT_DISPLAY_DURATION) {
-            hintFadeDirection = -1; // Start fade out
-          }
-        }
-        // Handle fade out
-        else if (hintFadeDirection === -1) {
-          hintOpacity -= HINT_FADE_SPEED;
-          if (hintOpacity <= 0) {
-            hintOpacity = 0;
-            // Move to next hint
-            currentHintIndex = (currentHintIndex + 1) % gameHints.length;
-            hintFadeDirection = 1;
-            hintDisplayTime = currentTime;
-          }
-        }
-
-        renderHints();
-      }
-
-      function renderHints() {
-        if (!hintsCanvasCtx || !showHints_flag) return;
-
-        // Clear canvas - updated dimensions
-        hintsCanvasCtx.clearRect(0, 0, 800, 120);
-
-        if (hintOpacity > 0) {
-          const hintText = gameHints[currentHintIndex];
-
-          // Set text properties - Pirate style font for hints with increased size
-          hintsCanvasCtx.font = "bold 46px 'Pirata One', 'Jolly Lodger', serif";
-          hintsCanvasCtx.textAlign = "center";
-          hintsCanvasCtx.textBaseline = "middle";
-
-          // Apply opacity
-          hintsCanvasCtx.globalAlpha = hintOpacity;
-
-          // Draw text with enhanced shadow for pirate aesthetic
-          hintsCanvasCtx.fillStyle = "rgba(0, 0, 0, 0.8)";
-          hintsCanvasCtx.fillText(hintText, 403, 63); // Enhanced shadow offset
-
-          hintsCanvasCtx.fillStyle = "#ffffff";
-          hintsCanvasCtx.fillText(hintText, 400, 60);
-
-          // Reset global alpha
-          hintsCanvasCtx.globalAlpha = 1;
+        if (hintElement && gameHints[currentHintIndex]) {
+          hintElement.textContent = gameHints[currentHintIndex];
+          // Small delay to ensure text is updated before fade in
+          setTimeout(() => {
+            hintElement.classList.add("visible");
+            console.log("Added visible class to hint element");
+          }, 50);
         }
       }
       // ========== END HINTS SYSTEM ==========
@@ -2539,6 +3260,12 @@
 
       // Add mouse and touch support for mobile devices
       menu.mouseEvents = function (event) {
+        // Check if HTML Play button is visible - if so, ignore canvas touches
+        const menuPlayButton = document.getElementById("menuPlayButton");
+        if (menuPlayButton && menuPlayButton.style.display !== "none") {
+          return; // Let the HTML button handle the interaction
+        }
+
         if (event.type === "click" || event.type === "touchend") {
           let rect = this.world.canvas.getBoundingClientRect();
           let x =
@@ -2558,7 +3285,7 @@
 
           // Check if click is on any button
           for (let i = 0; i < this.button.length; i++) {
-            let buttonY = this.select_pos.y + 20 + i * 25; // Added 20px offset to match visual position
+            let buttonY = this.select_pos.y + 35 + i * 45; // Updated spacing for multiple buttons
             let buttonWidth = this.button[i].name.length * 12; // Approximate button width
             let buttonHeight = 30; // Approximate button height
 
@@ -2587,6 +3314,31 @@
       menu.init = function () {
         this.init_once = true;
 
+        // Show HTML Play button for better mobile experience
+        const menuPlayButton = document.getElementById("menuPlayButton");
+        if (menuPlayButton) {
+          menuPlayButton.style.display = "block";
+
+          // Remove any existing event listeners to avoid duplicates
+          menuPlayButton.onclick = null;
+
+          // Add click/touch event listener
+          menuPlayButton.onclick = () => {
+            // Play selection sound
+            if (this.world.assets.audio && this.world.assets.audio.selection) {
+              this.world.assets.audio.selection.audio.play();
+            }
+
+            // Hide the button
+            menuPlayButton.style.display = "none";
+
+            // Start game
+            this.world.current_level = 1;
+            resetGame();
+            this.world.startScene("inGame");
+          };
+        }
+
         // Play menu music (waves sound)
         playMenuMusic();
 
@@ -2597,7 +3349,7 @@
             link: "inGame",
           },
           {
-            name: "SELECT",
+            name: "LEVEL SELECT",
             link: "levels",
           },
         ];
@@ -2606,7 +3358,7 @@
         this.selection = 0;
         this.select_pos = {
           x: this.world.W / 2,
-          y: 110, // Back to original position for background image
+          y: 125, // Back to previous position
         };
         // cursor removed - no longer needed
         // background
@@ -2735,26 +3487,47 @@
 
         this.ctx.restore();
 
+        // Canvas button rendering enabled for testing - display multiple buttons
         // Display the buttons text over the image with pirate fonts
         for (i in this.button) {
           // Set pirate font and colors for buttons
-          this.world.ctx.font = "24px 'Pirata One', sans-serif";
+          this.world.ctx.font = "36px 'Pirata One', sans-serif"; // Increased 50% from 24px to 36px
           this.world.ctx.textAlign = "center";
           this.world.ctx.lineWidth = 3; // Increased from 2 to 3 for thicker border
 
+          // Different styling based on selection
           if (i == this.selection) {
-            // Selected button - bright gold with brown shadow
-            this.world.ctx.fillStyle = "#FFD700";
-            this.world.ctx.strokeStyle = "#8B4513";
+            // Selected button - bright gold with pulsing animation
+            let time = Date.now() * 0.003; // Slow pulsing speed
+            let pulse = (Math.sin(time) + 1) / 2; // Oscillates between 0 and 1
+
+            // Interpolate between the two colors based on pulse
+            let brightGold = "#FFD700"; // Selected color
+            let darkGold = "#B8860B"; // Base color
+
+            // Create smooth color transition
+            let r1 = parseInt(brightGold.substr(1, 2), 16);
+            let g1 = parseInt(brightGold.substr(3, 2), 16);
+            let b1 = parseInt(brightGold.substr(5, 2), 16);
+            let r2 = parseInt(darkGold.substr(1, 2), 16);
+            let g2 = parseInt(darkGold.substr(3, 2), 16);
+            let b2 = parseInt(darkGold.substr(5, 2), 16);
+
+            let r = Math.round(r2 + (r1 - r2) * pulse);
+            let g = Math.round(g2 + (g1 - g2) * pulse);
+            let b = Math.round(b2 + (b1 - b2) * pulse);
+
+            this.world.ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            this.world.ctx.strokeStyle = "#8B4513"; // Brown shadow
           } else {
-            // Unselected button - darker gold with black shadow
+            // Unselected button - static dark gold
             this.world.ctx.fillStyle = "#B8860B";
             this.world.ctx.strokeStyle = "#2F1B14";
           }
 
           let title = this.button[i].name;
           let x = this.select_pos.x;
-          let y = this.select_pos.y + 20 + i * 25; // Added 20px offset to move buttons down without affecting background
+          let y = this.select_pos.y + 35 + i * 45; // Increased spacing for two buttons
 
           // Draw text with outline
           this.world.ctx.strokeText(title, x, y);
@@ -2945,6 +3718,10 @@
 
         // Handle surrender with S key
         if (event.code === "KeyS" && event.type === "keydown") {
+          // Farcade SDK: Haptic feedback for surrender key
+          if (window.FarcadeSDK) {
+            window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
+          }
           surrenderGame(game);
           return;
         }
@@ -2955,6 +3732,12 @@
         this.won = false;
         this.userInput = true;
         this.world.initMap("map_" + this.world.current_level);
+
+        // Hide HTML Play button when entering game
+        const menuPlayButton = document.getElementById("menuPlayButton");
+        if (menuPlayButton) {
+          menuPlayButton.style.display = "none";
+        }
 
         // Ensure pirate music is playing, but don't restart if already playing
         ensurePirateMusicPlaying();
@@ -3178,45 +3961,12 @@
       inGame.mouseEvents = function (event) {
         if (!this.userInput) return;
 
-        if (event.type === "touchstart") {
-          this.touchStartX = event.touches[0].clientX;
-          this.touchStartY = event.touches[0].clientY;
-        } else if (event.type === "touchend") {
-          if (this.touchStartX && this.touchStartY) {
-            let touchEndX = event.changedTouches[0].clientX;
-            let touchEndY = event.changedTouches[0].clientY;
+        // The improved touch handling is now managed by the main engine
+        // This function mainly handles any game-specific mouse/touch interactions
+        // that aren't movement-related (e.g., UI interactions)
 
-            let deltaX = touchEndX - this.touchStartX;
-            let deltaY = touchEndY - this.touchStartY;
-
-            // Minimum swipe distance
-            let minSwipeDistance = 50;
-
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
-              // Horizontal swipe
-              if (Math.abs(deltaX) > minSwipeDistance) {
-                if (deltaX > 0) {
-                  this.moveCats(1, 0); // Right
-                } else {
-                  this.moveCats(-1, 0); // Left
-                }
-              }
-            } else {
-              // Vertical swipe
-              if (Math.abs(deltaY) > minSwipeDistance) {
-                if (deltaY > 0) {
-                  this.moveCats(0, 1); // Down
-                } else {
-                  this.moveCats(0, -1); // Up
-                }
-              }
-            }
-
-            // Reset touch coordinates
-            this.touchStartX = null;
-            this.touchStartY = null;
-          }
-        }
+        // For movement, we rely on the improved touch system in the main engine
+        // which handles hold gestures, continuous movement, and better zone detection
       };
 
       inGame.control = function () {
@@ -3304,6 +4054,11 @@
             gameScore += 100;
             updateHUD();
 
+            // Farcade SDK: Haptic feedback for collecting coin
+            if (window.FarcadeSDK) {
+              window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
+            }
+
             // Play coin collection sound
             if (
               this.world.assets.audio.coin_collect &&
@@ -3324,14 +4079,31 @@
 
       inGame.checkWin = function () {
         if (this.cats.length === 0) {
-          // everyone is dead :/
-          this.transition.start(
-            0,
-            Math.max(this.world.W / 2, this.world.H / 2),
-            () => {
-              this.world.startScene("inGame");
-            }
-          );
+          // No cats left - Game Over (this should not normally be reached
+          // since individual cat death now triggers immediate game over)
+          hideHUD();
+          stopAllMusic();
+          console.log("GAME OVER - All pirates lost - Final Score:", gameScore);
+
+          // Farcade SDK: Report game over with score
+          if (window.FarcadeSDK) {
+            window.FarcadeSDK.singlePlayer.actions.gameOver({
+              score: gameScore,
+            });
+          }
+
+          // Reset game to level 1 for next play
+          this.world.current_level = 1;
+          resetGame();
+
+          // Show the HTML Play button when returning to menu
+          const menuPlayButton = document.getElementById("menuPlayButton");
+          if (menuPlayButton) {
+            menuPlayButton.style.display = "block";
+          }
+
+          // Return to menu
+          this.world.startScene("menu");
           return false;
         }
         let win = this.cats.every((cat) => {
@@ -3390,9 +4162,23 @@
                   gameScore
                 );
 
+                // Farcade SDK: Report game completion with final score
+                if (window.FarcadeSDK) {
+                  window.FarcadeSDK.singlePlayer.actions.gameOver({
+                    score: gameScore,
+                  });
+                }
+
                 // Reset game to level 1 for next play
                 this.world.current_level = 1;
                 resetGame();
+
+                // Show the HTML Play button when returning to menu
+                const menuPlayButton =
+                  document.getElementById("menuPlayButton");
+                if (menuPlayButton) {
+                  menuPlayButton.style.display = "block";
+                }
 
                 // Return to menu (menu will start its own music)
                 this.world.startScene("menu");
@@ -3491,25 +4277,39 @@
                     this.scene.cats.splice(this.scene.cats.indexOf(this), 1);
                     this.world.assets.audio.splash.audio.play();
 
-                    // Check if this was the last cat or if we should trigger game over
-                    if (this.scene.cats.length === 0) {
-                      // All cats are dead - Game Over
-                      hideHUD();
-                      stopAllMusic(); // Stop background music
-                      console.log(
-                        "GAME OVER - Pirate fell into water - Final Score:",
-                        gameScore
-                      );
-
-                      // Reset game to level 1 for next play
-                      this.world.current_level = 1;
-                      resetGame();
-
-                      // Return to menu (menu will start its own music)
-                      this.world.startScene("menu");
-                    } else {
-                      this.scene.checkWin();
+                    // Farcade SDK: Haptic feedback for falling in water
+                    if (window.FarcadeSDK) {
+                      window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
                     }
+
+                    // Game Over immediately when ANY pirate falls into water
+                    hideHUD();
+                    stopAllMusic(); // Stop background music
+                    console.log(
+                      "GAME OVER - Pirate fell into water - Final Score:",
+                      gameScore
+                    );
+
+                    // Farcade SDK: Report game over with score
+                    if (window.FarcadeSDK) {
+                      window.FarcadeSDK.singlePlayer.actions.gameOver({
+                        score: gameScore,
+                      });
+                    }
+
+                    // Reset game to level 1 for next play
+                    this.world.current_level = 1;
+                    resetGame();
+
+                    // Show the HTML Play button when returning to menu
+                    const menuPlayButton =
+                      document.getElementById("menuPlayButton");
+                    if (menuPlayButton) {
+                      menuPlayButton.style.display = "block";
+                    }
+
+                    // Return to menu (menu will start its own music)
+                    this.world.startScene("menu");
                   }
                 );
                 spawn_effect.sprite.offset.y = 0;
@@ -3676,6 +4476,48 @@
       game.ready();
       // everything start being loaded now !
       // the ready function must be called last !
+
+      // Farcade SDK: Game is ready to play
+      if (window.FarcadeSDK) {
+        window.FarcadeSDK.singlePlayer.actions.ready();
+
+        // Handle play again requests
+        window.FarcadeSDK.on("play_again", () => {
+          // Reset game state and start new game
+          game.current_level = 1;
+          game.score = 0;
+          levelTime = 30;
+
+          // Show the HTML Play button when returning to menu
+          const menuPlayButton = document.getElementById("menuPlayButton");
+          if (menuPlayButton) {
+            menuPlayButton.style.display = "block";
+          }
+
+          game.startScene("menu");
+        });
+
+        // Handle mute/unmute toggle
+        window.FarcadeSDK.on("toggle_mute", (data) => {
+          // Set game audio based on data.isMuted
+          if (data.isMuted) {
+            game.soundLevel(0);
+            stopAllMusic();
+          } else {
+            game.soundLevel(0.1);
+            // Resume appropriate music based on current scene
+            if (game.current_scene && game.current_scene.name === "menu") {
+              ensureMenuMusicPlaying();
+            } else if (
+              game.current_scene &&
+              game.current_scene.name === "inGame"
+            ) {
+              ensurePirateMusicPlaying();
+            }
+          }
+        });
+      }
+
       // Making the game full screen and with a softer audio volume by default
       game.soundLevel(0.1);
       game.fullScreen();
