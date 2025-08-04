@@ -73,54 +73,75 @@
         }
       }
 
-      /* Menu Play Button Overlay */
-      #menuPlayButton {
+      /* Menu Buttons Container */
+      #menuButtons {
         position: fixed;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -25%);
+        transform: translate(-50%, -50%);
+        display: none; /* Hidden by default */
+        flex-direction: column;
+        gap: 20px;
+        z-index: 1000;
+        pointer-events: auto;
+      }
+
+      /* Individual Menu Buttons */
+      #menuPlayButton,
+      #menuSelectButton {
         background: transparent;
         border: none;
-        color: #ffd700;
+        color: #ffffff;
         font-family: "Pirata One", sans-serif;
-        font-size: 36px;
-        text-shadow: 3px 3px 0px #8b4513;
+        font-size: 32px;
+        text-shadow: 3px 3px 0px #000000;
         cursor: pointer;
         padding: 15px 30px;
-        z-index: 1000;
-        display: none; /* Hidden by default */
         outline: none;
         -webkit-tap-highlight-color: transparent;
         -webkit-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
-        /* Ensure it's above canvas */
-        pointer-events: auto;
-        /* Add pulsing animation similar to the original */
-        animation: playButtonPulse 3s ease-in-out infinite;
+        transition: all 0.3s ease;
+        text-align: center;
+        min-width: 150px;
       }
 
-      @keyframes playButtonPulse {
+      /* Hover and active effects */
+      #menuPlayButton:hover,
+      #menuSelectButton:hover {
+        color: #ffd700;
+        text-shadow: 3px 3px 0px #8b4513;
+        transform: scale(1.1);
+      }
+
+      #menuPlayButton:active,
+      #menuSelectButton:active {
+        transform: scale(0.95);
+        color: #b8860b;
+        text-shadow: 2px 2px 0px #2f1b14;
+      }
+
+      /* Pulsing animation for better visibility */
+      @keyframes menuButtonPulse {
         0% {
-          color: #b8860b;
-          text-shadow: 2px 2px 0px #2f1b14;
+          color: #ffffff;
+          text-shadow: 3px 3px 0px #000000;
         }
         50% {
           color: #ffd700;
           text-shadow: 3px 3px 0px #8b4513;
         }
         100% {
-          color: #b8860b;
-          text-shadow: 2px 2px 0px #2f1b14;
+          color: #ffffff;
+          text-shadow: 3px 3px 0px #000000;
         }
       }
 
-      #menuPlayButton:active {
-        transform: translate(-50%, -25%) scale(0.95);
-        color: #b8860b;
-        text-shadow: 2px 2px 0px #2f1b14;
-        animation: none; /* Stop pulsing when pressed */
+      #menuPlayButton,
+      #menuSelectButton {
+        animation: menuButtonPulse 4s ease-in-out infinite;
       }
 
       /* HUD Styles - Responsive HTML elements */
@@ -194,6 +215,7 @@
       }
 
       /* Hints Styles - Responsive HTML elements */
+      /*
       #gameHints {
         position: fixed;
         bottom: 40px;
@@ -234,6 +256,81 @@
       #hintsCanvas {
         display: none;
       }
+      */
+
+      /* Control Pad Styles - Mobile game controls */
+      #controlPad {
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 160px;
+        height: 160px;
+        z-index: 1000;
+        display: none;
+      }
+
+      .control-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        width: 100%;
+        height: 100%;
+        gap: 0px;
+      }
+
+      .control-button {
+        background: rgba(0, 0, 0, 0.8);
+        border: 2px solid #444;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 24px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+        touch-action: manipulation;
+        transition: all 0.1s ease;
+        cursor: pointer;
+      }
+
+      .control-button:active {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: #fff;
+        transform: scale(0.95);
+      }
+
+      .control-button.active {
+        background: rgba(255, 255, 255, 0.4);
+        border-color: #fff;
+        transform: scale(0.9);
+      }
+
+      .control-button.up {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .control-button.left {
+        grid-column: 1;
+        grid-row: 2;
+      }
+
+      .control-button.right {
+        grid-column: 3;
+        grid-row: 2;
+      }
+
+      .control-button.down {
+        grid-column: 2;
+        grid-row: 3;
+      }
+
+      /* Control pad will be shown/hidden via JavaScript based on device type and game state */
+      #controlPad {
+        display: none;
+      }
 
       /* Responsive adjustments */
       @media (max-width: 600px) {
@@ -268,14 +365,29 @@
     </div>
 
     <!-- Game Hints - Rotating hints at bottom -->
+    <!--
     <div id="gameHints">
       <div class="hints-container">
         <p class="hint-text" id="hintText">Take all the coins, or not...</p>
       </div>
     </div>
+    -->
 
-    <!-- Menu Play Button Overlay -->
-    <button id="menuPlayButton">PLAY</button>
+    <!-- Control Pad for Mobile -->
+    <div id="controlPad">
+      <div class="control-grid">
+        <div class="control-button up" data-direction="up">↑</div>
+        <div class="control-button left" data-direction="left">←</div>
+        <div class="control-button right" data-direction="right">→</div>
+        <div class="control-button down" data-direction="down">↓</div>
+      </div>
+    </div>
+
+    <!-- Menu Buttons Overlay -->
+    <div id="menuButtons">
+      <button id="menuPlayButton">PLAY</button>
+      <button id="menuSelectButton">SELECT</button>
+    </div>
 
     <!-- Touch feedback indicator -->
     <div id="touchFeedback" class="touch-feedback"></div>
@@ -334,6 +446,46 @@
         t--;
         return (c / 2) * (-Math.pow(2, -10 * t) + 2) + b;
       };
+
+      // ========== MOBILE DETECTION AND CONTROL PAD MANAGEMENT ==========
+
+      // Function to detect if the device is mobile
+      function isMobileDevice() {
+        const userAgent =
+          navigator.userAgent || navigator.vendor || window.opera;
+
+        // Check for mobile user agents
+        const mobileRegex =
+          /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+
+        // Check for touch capability and screen size
+        const hasTouch =
+          "ontouchstart" in window || navigator.maxTouchPoints > 0;
+        const isSmallScreen = window.innerWidth <= 768;
+
+        return mobileRegex.test(userAgent) || (hasTouch && isSmallScreen);
+      }
+
+      // Function to show/hide control pad based on device and game state
+      function updateControlPadVisibility(currentScene) {
+        const controlPad = document.getElementById("controlPad");
+        if (!controlPad) return;
+
+        // Only show control pad if:
+        // 1. It's a mobile device
+        // 2. AND we're currently in the game (inGame scene)
+        const shouldShow = isMobileDevice() && currentScene === "inGame";
+
+        controlPad.style.display = shouldShow ? "block" : "none";
+
+        console.log("Control pad visibility updated:", {
+          isMobile: isMobileDevice(),
+          currentScene: currentScene,
+          shouldShow: shouldShow,
+        });
+      }
+
+      // ========== END MOBILE DETECTION AND CONTROL PAD MANAGEMENT ==========
 
       // ----------
       // Scene
@@ -994,15 +1146,10 @@
             false
           );
 
-          // Add swipe gesture support for mobile movement
+          // Add simplified touch events for general canvas interaction
           this.canvas.addEventListener(
             "touchstart",
             (event) => this.touchStart(event),
-            false
-          );
-          this.canvas.addEventListener(
-            "touchmove",
-            (event) => this.touchMove(event),
             false
           );
           this.canvas.addEventListener(
@@ -1011,15 +1158,91 @@
             false
           );
 
+          // Initialize control pad for mobile
+          this.initControlPad();
+
           // Touch tracking variables
           this.touchStartX = 0;
           this.touchStartY = 0;
           this.touchEndX = 0;
           this.touchEndY = 0;
-          this.minSwipeDistance = 20; // Reduced from 30 to 20 for more sensitive swipes
-          this.holdTimer = null;
-          this.continuousTimer = null;
-          this.isHolding = false;
+        }
+
+        initControlPad() {
+          const controlButtons = document.querySelectorAll(".control-button");
+
+          // Initialize control pad visibility based on current device and scene
+          updateControlPadVisibility(
+            this.current_scene ? this.current_scene.name : "menu"
+          );
+
+          controlButtons.forEach((button) => {
+            const direction = button.getAttribute("data-direction");
+
+            // Add touch events for mobile
+            button.addEventListener("touchstart", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              this.handleControlPadInput(direction);
+              button.classList.add("active");
+            });
+
+            button.addEventListener("touchend", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              button.classList.remove("active");
+            });
+
+            // Add mouse events for desktop testing (only if mobile device)
+            if (isMobileDevice()) {
+              button.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleControlPadInput(direction);
+                button.classList.add("active");
+              });
+
+              button.addEventListener("mouseup", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                button.classList.remove("active");
+              });
+            }
+
+            // Prevent context menu on long press
+            button.addEventListener("contextmenu", (e) => {
+              e.preventDefault();
+            });
+          });
+        }
+
+        handleControlPadInput(direction) {
+          if (!this.current_scene || this.current_scene.name !== "inGame") {
+            return;
+          }
+
+          let moveX = 0,
+            moveY = 0;
+
+          switch (direction) {
+            case "up":
+              moveY = -1;
+              break;
+            case "down":
+              moveY = 1;
+              break;
+            case "left":
+              moveX = -1;
+              break;
+            case "right":
+              moveX = 1;
+              break;
+          }
+
+          if (moveX !== 0 || moveY !== 0) {
+            console.log("Control pad input:", direction, moveX, moveY);
+            this.current_scene.moveCats(moveX, moveY);
+          }
         }
         keyDown(event) {
           event.preventDefault();
@@ -1032,304 +1255,27 @@
           this.keys[event.code] = false;
         }
 
-        // Touch event handlers for improved mobile controls
+        // Simplified touch event handlers
         touchStart(event) {
           event.preventDefault();
           const touch = event.touches[0];
           this.touchStartX = touch.clientX;
           this.touchStartY = touch.clientY;
-          this.touchStartTime = Date.now();
-          this.isHolding = false;
-          this.lastMoveTime = 0;
-          this.moveRepeatDelay = 150; // Reduced from 200ms - faster initial response
-          this.moveRepeatRate = 120; // Reduced from 150ms - faster continuous movement
-
-          // Show touch feedback
-          this.showTouchFeedback(this.touchStartX, this.touchStartY);
-
-          // Start hold detection timer
-          this.holdTimer = setTimeout(() => {
-            this.isHolding = true;
-            this.startContinuousMovement();
-          }, 150); // Reduced from 200ms - start continuous movement faster
 
           console.log("Touch start:", this.touchStartX, this.touchStartY);
-        }
-
-        showTouchFeedback(x, y) {
-          const feedback = document.getElementById("touchFeedback");
-          if (feedback) {
-            feedback.style.left = x + "px";
-            feedback.style.top = y + "px";
-            feedback.style.display = "block";
-
-            // Hide after animation
-            setTimeout(() => {
-              feedback.style.display = "none";
-            }, 300);
-          }
-        }
-
-        touchMove(event) {
-          event.preventDefault();
-
-          // If holding and moving, update the direction
-          if (this.isHolding && event.touches[0]) {
-            const touch = event.touches[0];
-            this.currentTouchX = touch.clientX;
-            this.currentTouchY = touch.clientY;
-          }
         }
 
         touchEnd(event) {
           event.preventDefault();
 
-          // Clear hold timer and continuous movement
-          if (this.holdTimer) {
-            clearTimeout(this.holdTimer);
-            this.holdTimer = null;
-          }
-
-          if (this.continuousTimer) {
-            clearInterval(this.continuousTimer);
-            this.continuousTimer = null;
-          }
-
-          if (!event.changedTouches) return;
-
-          const touch = event.changedTouches[0];
-          this.touchEndX = touch.clientX;
-          this.touchEndY = touch.clientY;
-          const touchDuration = Date.now() - this.touchStartTime;
-
-          console.log(
-            "Touch end:",
-            this.touchEndX,
-            this.touchEndY,
-            "Duration:",
-            touchDuration
-          );
-
-          // If it was a quick tap (not a hold), handle as single movement
-          if (!this.isHolding && touchDuration < 200) {
-            // Check if it's a swipe or a tap
-            const deltaX = this.touchEndX - this.touchStartX;
-            const deltaY = this.touchEndY - this.touchStartY;
-            const swipeDistance = Math.max(Math.abs(deltaX), Math.abs(deltaY));
-
-            if (swipeDistance >= this.minSwipeDistance) {
-              // It's a swipe - handle movement
-              this.handleSwipe();
-            } else {
-              // It's a tap - check for virtual buttons or handle as click
-              if (this.current_scene && this.current_scene.name === "inGame") {
-                this.handleVirtualButtons(this.touchEndX, this.touchEndY);
-              } else {
-                // Handle as click for menus and buttons
-                this.mouseEvent(event);
-              }
-            }
+          // Handle as click for menus and buttons when not in game
+          if (!this.current_scene || this.current_scene.name !== "inGame") {
+            this.mouseEvent(event);
           }
 
           // Reset touch state
-          this.isHolding = false;
-          this.currentTouchX = null;
-          this.currentTouchY = null;
-        }
-
-        startContinuousMovement() {
-          if (this.continuousTimer) {
-            clearInterval(this.continuousTimer);
-          }
-
-          // Immediate first move
-          this.handleContinuousMove();
-
-          // Set up continuous movement
-          this.continuousTimer = setInterval(() => {
-            if (this.isHolding) {
-              this.handleContinuousMove();
-            } else {
-              clearInterval(this.continuousTimer);
-              this.continuousTimer = null;
-            }
-          }, this.moveRepeatRate);
-        }
-
-        handleContinuousMove() {
-          if (
-            !this.isHolding ||
-            !this.current_scene ||
-            this.current_scene.name !== "inGame"
-          ) {
-            return;
-          }
-
-          // Use current touch position if available, otherwise use start position
-          const currentX = this.currentTouchX || this.touchStartX;
-          const currentY = this.currentTouchY || this.touchStartY;
-
-          const deltaX = currentX - this.touchStartX;
-          const deltaY = currentY - this.touchStartY;
-          const absDeltaX = Math.abs(deltaX);
-          const absDeltaY = Math.abs(deltaY);
-
-          // Determine direction based on touch position or initial swipe
-          let moveX = 0,
-            moveY = 0;
-
-          if (absDeltaX > absDeltaY && absDeltaX > 30) {
-            // Horizontal movement
-            moveX = deltaX > 0 ? 1 : -1;
-          } else if (absDeltaY > 30) {
-            // Vertical movement
-            moveY = deltaY > 0 ? 1 : -1;
-          } else {
-            // If no clear direction from drag, use screen zones
-            this.handleVirtualButtons(currentX, currentY);
-            return;
-          }
-
-          // Execute movement
-          if (moveX !== 0 || moveY !== 0) {
-            console.log("Continuous move:", moveX, moveY);
-            this.current_scene.moveCats(moveX, moveY);
-          }
-        }
-
-        handleVirtualButtons(x, y) {
-          // Get canvas dimensions
-          const rect = this.canvas.getBoundingClientRect();
-          const canvasWidth = rect.width;
-          const canvasHeight = rect.height;
-
-          // Define virtual button areas with improved zones
-          const cornerSize = 0.3; // 30% for corner zones (increased from 25%)
-          const centerDeadZone = 0.2; // 20% dead zone in center to avoid accidental moves
-
-          // Calculate center bounds
-          const centerLeft = canvasWidth * ((1 - centerDeadZone) / 2);
-          const centerRight = canvasWidth * ((1 + centerDeadZone) / 2);
-          const centerTop = canvasHeight * ((1 - centerDeadZone) / 2);
-          const centerBottom = canvasHeight * ((1 + centerDeadZone) / 2);
-
-          // Skip movement if in center dead zone
-          if (
-            x > centerLeft &&
-            x < centerRight &&
-            y > centerTop &&
-            y < centerBottom
-          ) {
-            console.log("Touch in center dead zone - no movement");
-            return;
-          }
-
-          // Determine movement based on which zone is most prominent
-          const distanceToLeft = x;
-          const distanceToRight = canvasWidth - x;
-          const distanceToTop = y;
-          const distanceToBottom = canvasHeight - y;
-
-          // Find the minimum distance to determine primary direction
-          const minDistance = Math.min(
-            distanceToLeft,
-            distanceToRight,
-            distanceToTop,
-            distanceToBottom
-          );
-
-          // Only move if we're clearly in a direction zone
-          const threshold = canvasWidth * 0.15; // Must be within 15% of edge
-
-          if (minDistance > threshold) {
-            console.log("Touch too far from edges - no movement");
-            return;
-          }
-
-          // Execute movement based on closest edge
-          if (minDistance === distanceToTop) {
-            console.log("Virtual up button pressed - distance:", minDistance);
-            this.current_scene.moveCats(0, -1);
-          } else if (minDistance === distanceToBottom) {
-            console.log("Virtual down button pressed - distance:", minDistance);
-            this.current_scene.moveCats(0, 1);
-          } else if (minDistance === distanceToLeft) {
-            console.log("Virtual left button pressed - distance:", minDistance);
-            this.current_scene.moveCats(-1, 0);
-          } else if (minDistance === distanceToRight) {
-            console.log(
-              "Virtual right button pressed - distance:",
-              minDistance
-            );
-            this.current_scene.moveCats(1, 0);
-          }
-        }
-        handleSwipe() {
-          const deltaX = this.touchEndX - this.touchStartX;
-          const deltaY = this.touchEndY - this.touchStartY;
-          const absDeltaX = Math.abs(deltaX);
-          const absDeltaY = Math.abs(deltaY);
-
-          console.log("Swipe detected:", {
-            deltaX,
-            deltaY,
-            absDeltaX,
-            absDeltaY,
-            minDistance: this.minSwipeDistance,
-            scene: this.current_scene?.name,
-          });
-
-          // Check if it's a valid swipe (minimum distance)
-          if (Math.max(absDeltaX, absDeltaY) < this.minSwipeDistance) {
-            console.log("Swipe too small, ignoring");
-            return;
-          }
-
-          // Only handle swipes during inGame scene
-          if (!this.current_scene || this.current_scene.name !== "inGame") {
-            console.log("Not in inGame scene, ignoring swipe");
-            return;
-          }
-
-          // Determine swipe direction and move cats directly
-          if (absDeltaX > absDeltaY) {
-            // Horizontal swipe
-            if (deltaX > 0) {
-              // Swipe right
-              console.log("Moving right");
-              this.current_scene.moveCats(1, 0);
-            } else {
-              // Swipe left
-              console.log("Moving left");
-              this.current_scene.moveCats(-1, 0);
-            }
-          } else {
-            // Vertical swipe
-            if (deltaY > 0) {
-              // Swipe down
-              console.log("Moving down");
-              this.current_scene.moveCats(0, 1);
-            } else {
-              // Swipe up
-              console.log("Moving up");
-              this.current_scene.moveCats(0, -1);
-            }
-          }
-        }
-
-        simulateKeyPress(keyCode) {
-          // Create and dispatch the keydown event to the current scene
-          const keyDownEvent = new KeyboardEvent("keydown", {
-            code: keyCode,
-            key: keyCode.replace("Arrow", "Arrow"),
-            bubbles: true,
-            cancelable: true,
-          });
-
-          // Call the scene's keyEvents function
-          if (this.current_scene && this.current_scene.keyEvents) {
-            this.current_scene.keyEvents(keyDownEvent);
-          }
+          this.touchStartX = 0;
+          this.touchStartY = 0;
         }
 
         mouseEvent(event) {
@@ -1358,6 +1304,10 @@
           this.requestChange.action = "";
           this.FPS.last = Util.timeStamp();
           this.current_scene = this.scenes[scene_name];
+
+          // Update control pad visibility based on new scene
+          updateControlPadVisibility(scene_name);
+
           this.initScene();
           // does this scenes needs a gameloop ?
           if (this.current_scene.loop === true) {
@@ -1786,6 +1736,11 @@
             type: "img",
             name: "main_title",
             path: "https://i.postimg.cc/Gm1h8VLy/opensea-logo.png",
+          },
+          {
+            type: "img",
+            name: "menu_background_island",
+            path: "https://i.postimg.cc/1tKT8Qbz/THE-OPEN-SEA-6.png",
           },
           {
             type: "img",
@@ -2378,10 +2333,10 @@
                 },
                 geometry: [
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-                  [4, 0, 6, 4, 6, 6, 4, 6, 6, 6, 4, 6, 6, 6, 8, 4],
-                  [4, 6, 6, 4, 6, 4, 4, 6, 4, 6, 4, 6, 4, 4, 6, 4],
+                  [4, 17, 6, 0, 6, 6, 6, 6, 4, 6, 4, 6, 6, 6, 8, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 6, 4, 4, 6, 4],
                   [4, 6, 4, 4, 6, 4, 6, 6, 4, 6, 6, 6, 4, 17, 6, 4],
-                  [4, 6, 6, 6, 6, 4, 6, 4, 4, 4, 4, 6, 4, 6, 4, 4],
+                  [4, 6, 6, 6, 6, 4, 4, 4, 4, 4, 4, 6, 4, 6, 4, 4],
                   [4, 4, 4, 6, 4, 4, 6, 6, 6, 6, 4, 6, 6, 6, 4, 4],
                   [4, 6, 6, 6, 4, 6, 6, 4, 6, 4, 4, 4, 6, 4, 4, 4],
                   [4, 6, 4, 4, 4, 6, 4, 4, 6, 6, 6, 6, 6, 6, 5, 4],
@@ -2444,9 +2399,9 @@
                   [0, 11, 0, 7, 11, 0, 0, 11, 11, 0, 0, 0, 5, 0, 11, 0],
                   [0, 11, 17, 0, 11, 0, 0, 11, 11, 0, 0, 0, 0, 8, 11, 0],
                   [0, 0, 0, 0, 11, 11, 11, 11, 11, 11, 11, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 5, 0, 11, 11, 17, 5, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 11, 11, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 5, 17, 11, 11, 0, 5, 0, 0, 0, 0, 0],
                   [0, 11, 11, 0, 11, 0, 0, 11, 11, 0, 0, 11, 0, 11, 11, 0],
                   [0, 11, 8, 0, 11, 0, 0, 11, 11, 0, 0, 11, 0, 7, 11, 0],
                   [0, 11, 5, 0, 11, 0, 0, 0, 0, 0, 0, 11, 0, 17, 11, 0],
@@ -2581,7 +2536,7 @@
           {
             name: "map_11",
             tileset: "demo_tileset",
-            // Ice Sliding Puzzle - Inspirado en Chip's Challenge + Lolo
+            // Ice Arena - Mapa vacío con solo bordes y nieve
             layers: [
               // ground layer - todo terreno sólido
               {
@@ -2595,21 +2550,21 @@
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 0, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3],
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 0, 3, 0, 0, 0, 3, 0, 3, 0, 3, 3],
+                  [3, 3, 3, 3, 3, 0, 3, 0, 0, 0, 3, 0, 3, 0, 3, 3],
+                  [3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                 ],
               },
-              // Ice sliding puzzle con arbustos como frenos
+              // Arena de hielo - solo bordes y nieve
               {
                 name: "onGround",
                 offset: {
@@ -2618,32 +2573,32 @@
                 },
                 geometry: [
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-                  [4, 7, 6, 6, 6, 5, 6, 6, 6, 6, 5, 6, 6, 17, 8, 4],
-                  [4, 4, 4, 4, 6, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4],
-                  [4, 17, 6, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 17, 6, 4],
-                  [4, 4, 4, 5, 6, 4, 4, 4, 4, 6, 5, 4, 4, 4, 4, 4],
-                  [4, 6, 6, 6, 6, 6, 17, 6, 6, 6, 6, 6, 6, 6, 17, 4],
-                  [4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4],
-                  [4, 5, 6, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 6, 5, 4],
-                  [4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4],
-                  [4, 17, 6, 6, 6, 6, 6, 17, 6, 6, 6, 6, 6, 6, 6, 4],
-                  [4, 4, 4, 5, 6, 4, 4, 4, 4, 6, 5, 4, 4, 4, 4, 4],
-                  [4, 6, 6, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 17, 6, 4],
-                  [4, 4, 4, 4, 6, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4],
-                  [4, 17, 6, 6, 6, 5, 6, 6, 6, 6, 5, 6, 6, 17, 6, 4],
-                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 4],
+                  [4, 6, 6, 15, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 6, 6, 6, 6, 0, 0, 0, 0, 6, 6, 8, 6, 6, 6, 4],
+                  [4, 6, 6, 6, 6, 0, 5, 5, 0, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 6, 6, 6, 6, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 6, 6, 6, 6, 0, 6, 0, 0, 0, 5, 6, 5, 6, 6, 4],
+                  [4, 6, 6, 5, 6, 0, 6, 0, 0, 0, 5, 6, 5, 6, 6, 4],
+                  [4, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 5, 6, 6, 6, 6, 6, 6, 6, 6, 5, 6, 5, 5, 5, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 13, 6, 6, 6, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4],
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                 ],
-              }, // ice sliding layer
+              }, // ice arena layer
             ],
           },
 
           {
             name: "map_12",
             tileset: "demo_tileset",
-            // Water Maze Advanced - Inspirado en Sokoban + decisiones sin retorno
+            // Triple Track Challenge - 3 pistas cerradas independientes
             layers: [
-              // ground layer - islas conectadas por puentes
+              // ground layer - 3 pistas de terreno sólido
               {
                 name: "ground",
                 offset: {
@@ -2652,24 +2607,24 @@
                 },
                 geometry: [
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0],
-                  [0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0, 3, 3, 3, 0, 0],
-                  [0, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 3, 0, 0],
-                  [0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
-                  [0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0],
-                  [0, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0],
-                  [0, 3, 3, 3, 0, 3, 3, 3, 3, 3, 0, 3, 3, 3, 0, 0],
-                  [0, 3, 3, 3, 0, 0, 0, 3, 0, 0, 0, 3, 3, 3, 0, 0],
-                  [0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0],
-                  [0, 0, 3, 0, 0, 3, 3, 3, 3, 3, 0, 0, 3, 0, 0, 0],
-                  [0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0],
-                  [0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0],
-                  [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],
-                  [0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
+                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 ],
               },
-              // Spawn, exit, monedas y puntos de decisión críticos
+              // 3 pistas con rutas directas garantizadas - diseño simplificado para asegurar completabilidad
               {
                 name: "onGround",
                 offset: {
@@ -2678,32 +2633,38 @@
                 },
                 geometry: [
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 7, 17, 0, 0, 0, 0, 17, 0, 0, 0, 17, 0, 8, 0, 0],
-                  [0, 0, 5, 0, 0, 0, 5, 0, 5, 0, 0, 0, 5, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0],
-                  [0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 17, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0],
-                  [0, 17, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 17, 0, 0],
-                  [0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 17, 0, 0, 5, 0, 5, 0, 0, 17, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 17, 0, 0, 0, 0, 5, 0, 0, 0, 0, 17, 0, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [
+                    0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+                    0,
+                  ],
+                  [0, 11, 7, 0, 0, 0, 7, 0, 0, 0, 0, 7, 0, 0, 11, 0], // spawns en columnas 2, 6, 11
+                  [0, 11, 0, 5, 0, 0, 0, 4, 0, 0, 0, 0, 5, 0, 11, 0], // obstáculos en columnas 3, 7, 12 (no bloquean rutas)
+                  [0, 11, 0, 0, 17, 0, 0, 0, 5, 0, 0, 0, 0, 4, 11, 0], // monedas y obstáculos laterales
+                  [0, 11, 0, 4, 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 11, 0], // rutas 2, 6, 11 libres
+                  [0, 11, 0, 0, 5, 0, 0, 0, 17, 0, 0, 0, 0, 5, 11, 0], // obstáculos solo en columnas alternas
+                  [0, 11, 0, 17, 0, 0, 0, 4, 0, 0, 0, 0, 17, 0, 11, 0], // monedas accesibles lateralmente
+                  [0, 11, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 5, 0, 11, 0], // mantener rutas principales libres
+                  [0, 11, 0, 0, 4, 0, 0, 5, 0, 0, 0, 0, 0, 4, 11, 0], // obstáculos dispersos
+                  [0, 11, 0, 17, 0, 0, 0, 0, 5, 0, 0, 0, 17, 0, 11, 0], // más monedas laterales
+                  [0, 11, 0, 4, 0, 0, 0, 17, 0, 0, 0, 0, 4, 0, 11, 0], // obstáculos que no bloquean
+                  [0, 11, 0, 0, 5, 0, 0, 0, 4, 0, 0, 0, 0, 5, 11, 0], // penúltima fila con ruta libre
+                  [0, 11, 8, 0, 0, 0, 8, 0, 0, 0, 0, 8, 0, 0, 11, 0], // exits en columnas 2, 6, 11
+                  [
+                    0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+                    0,
+                  ],
                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 ],
-              }, // islands puzzle layer
+              }, // triple track layer
             ],
           },
 
           {
             name: "map_13",
             tileset: "demo_tileset",
-            // Twin Coordination Challenge - Inspirado en Lemmings
+            // Twin Coordination Challenge - Rediseñado para ser completable
             layers: [
-              // ground layer - terreno sólido para coordinación perfecta
+              // ground layer - terreno sólido para coordinación
               {
                 name: "ground",
                 offset: {
@@ -2729,7 +2690,7 @@
                   [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                 ],
               },
-              // Coordinación perfecta - timing crítico entre ambos piratas
+              // Coordinación simplificada pero desafiante
               {
                 name: "onGround",
                 offset: {
@@ -2738,20 +2699,20 @@
                 },
                 geometry: [
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-                  [4, 7, 6, 6, 5, 6, 6, 17, 6, 6, 5, 6, 6, 17, 8, 4],
-                  [4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4],
-                  [4, 4, 4, 6, 4, 17, 6, 6, 6, 17, 4, 6, 4, 4, 4, 4],
-                  [4, 4, 4, 6, 4, 6, 4, 5, 4, 6, 4, 6, 4, 4, 4, 4],
-                  [4, 17, 6, 6, 6, 6, 4, 6, 4, 6, 6, 6, 6, 6, 17, 4],
-                  [4, 4, 4, 5, 4, 6, 4, 6, 4, 6, 4, 5, 4, 4, 4, 4],
-                  [4, 4, 4, 6, 4, 6, 6, 6, 6, 6, 4, 6, 4, 4, 4, 4],
-                  [4, 4, 4, 6, 4, 4, 4, 17, 4, 4, 4, 6, 4, 4, 4, 4],
-                  [4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4],
-                  [4, 4, 4, 5, 4, 4, 4, 11, 4, 4, 4, 5, 4, 4, 4, 4],
-                  [4, 17, 6, 6, 6, 6, 4, 6, 4, 6, 6, 6, 6, 6, 17, 4],
-                  [4, 4, 4, 6, 4, 6, 4, 5, 4, 6, 4, 6, 4, 4, 4, 4],
-                  [4, 4, 4, 6, 4, 17, 6, 6, 6, 17, 4, 6, 4, 4, 4, 4],
-                  [4, 7, 6, 6, 5, 6, 6, 17, 6, 6, 5, 6, 6, 17, 8, 4],
+                  [4, 7, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 8, 4],
+                  [4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4],
+                  [4, 0, 0, 0, 0, 17, 0, 0, 0, 17, 0, 0, 0, 0, 0, 4],
+                  [4, 0, 4, 5, 4, 4, 4, 0, 4, 4, 4, 5, 4, 0, 4, 4],
+                  [4, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 4],
+                  [4, 4, 4, 0, 4, 0, 4, 4, 4, 0, 4, 0, 4, 4, 4, 4],
+                  [4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4],
+                  [4, 4, 4, 0, 4, 0, 4, 4, 4, 0, 4, 0, 4, 4, 4, 4],
+                  [4, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 4],
+                  [4, 0, 4, 5, 4, 4, 4, 0, 4, 4, 4, 5, 4, 0, 4, 4],
+                  [4, 0, 0, 0, 0, 17, 0, 0, 0, 17, 0, 0, 0, 0, 0, 4],
+                  [4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4],
+                  [4, 7, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 8, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                 ],
               }, // twin coordination layer
@@ -2856,6 +2817,9 @@
         showHUD_flag = true;
         document.getElementById("gameHUD").style.display = "block";
 
+        // Show control pad for mobile devices when entering game
+        updateControlPadVisibility("inGame");
+
         // Add event listener for surrender button (only once)
         const surrenderBtn = document.getElementById("surrenderBtn");
         if (surrenderBtn && !surrenderBtn.hasAttribute("data-listener-added")) {
@@ -2870,7 +2834,7 @@
         }
 
         // Also show hints during gameplay
-        showHints();
+        // showHints();
 
         updateHUD();
       }
@@ -2878,13 +2842,17 @@
       function hideHUD() {
         showHUD_flag = false;
         document.getElementById("gameHUD").style.display = "none";
+
+        // Hide control pad when leaving game
+        updateControlPadVisibility("menu");
+
         if (timerInterval) {
           clearInterval(timerInterval);
           timerInterval = null;
         }
 
         // Also hide hints when hiding HUD
-        hideHints();
+        // hideHints();
       }
 
       function updateScore() {
@@ -2911,7 +2879,7 @@
           // Change color when time is low
           if (levelTime <= 10) {
             timerDisplay.style.color = "#ff4444";
-            timerDisplay.style.textShadow = "3px 3px 0px rgba(255, 0, 0, 0.8)";
+            timerDisplay.style.textShadow = "2px 2px 0px rgba(0, 0, 0, 0.9)"; // Darker shadow for better contrast
           } else {
             timerDisplay.style.color = "#ffffff";
             timerDisplay.style.textShadow = "3px 3px 0px rgba(0, 0, 0, 0.8)";
@@ -2984,14 +2952,13 @@
         gameWorld.current_level = 1;
         resetGame();
 
-        // Show the HTML Play button when returning to menu
-        const menuPlayButton = document.getElementById("menuPlayButton");
-        if (menuPlayButton) {
-          menuPlayButton.style.display = "block";
-        }
-
         // Return to menu (menu will start its own music)
         gameWorld.startScene("menu");
+
+        // Force show menu buttons immediately
+        setTimeout(() => {
+          forceShowMenuButtons();
+        }, 100);
       }
 
       function surrenderGame(gameWorld) {
@@ -3010,14 +2977,13 @@
         gameWorld.current_level = 1;
         resetGame();
 
-        // Show the HTML Play button when returning to menu
-        const menuPlayButton = document.getElementById("menuPlayButton");
-        if (menuPlayButton) {
-          menuPlayButton.style.display = "block";
-        }
-
         // Return to menu (menu will start its own music)
         gameWorld.startScene("menu");
+
+        // Force show menu buttons immediately
+        setTimeout(() => {
+          forceShowMenuButtons();
+        }, 100);
       }
       function resetGame() {
         gameScore = 0;
@@ -3046,6 +3012,7 @@
       const HINT_DISPLAY_DURATION = 5000; // 5 seconds (increased from 3)
       const HINT_FADE_DURATION = 500; // 0.5 seconds
 
+      /*
       function showHints() {
         showHints_flag = true;
         console.log("Showing hints - setting display block");
@@ -3074,7 +3041,9 @@
           hintElement.classList.remove("visible");
         }
       }
+      */
 
+      /*
       function startHintRotation() {
         if (hintInterval) {
           clearInterval(hintInterval);
@@ -3116,6 +3085,7 @@
           }, 50);
         }
       }
+      */
       // ========== END HINTS SYSTEM ==========
 
       // ========== BACKGROUND MUSIC SYSTEM ==========
@@ -3216,151 +3186,161 @@
           });
         }
       }
+
+      function ensureMenuMusicPlaying() {
+        // Check if menu music is already playing
+        if (
+          game &&
+          game.assets &&
+          game.assets.audio &&
+          game.assets.audio.jingle &&
+          !game.assets.audio.jingle.audio.paused &&
+          game.assets.audio.jingle.audio.currentTime > 0
+        ) {
+          console.log("Menu music already playing, continuing...");
+          return;
+        }
+
+        // Start menu music if not playing
+        console.log("Starting menu music...");
+        playMenuMusic();
+      }
       // ========== END BACKGROUND MUSIC SYSTEM ==========
 
       // ========== END SCORE AND TIMER SYSTEM ==========
 
+      // ========== MENU BUTTONS MANAGEMENT ==========
+      function forceShowMenuButtons() {
+        console.log("FORCE SHOW: Forcing menu buttons to display");
+
+        const menuButtons = document.getElementById("menuButtons");
+        const menuPlayButton = document.getElementById("menuPlayButton");
+        const menuSelectButton = document.getElementById("menuSelectButton");
+
+        console.log("FORCE SHOW: Elements found:", {
+          menuButtons: !!menuButtons,
+          menuPlayButton: !!menuPlayButton,
+          menuSelectButton: !!menuSelectButton,
+        });
+
+        if (menuButtons) {
+          menuButtons.style.display = "flex";
+          menuButtons.style.visibility = "visible";
+          console.log("FORCE SHOW: Set menuButtons to flex and visible");
+        }
+
+        if (menuPlayButton) {
+          menuPlayButton.style.display = "block";
+          menuPlayButton.style.visibility = "visible";
+          console.log("FORCE SHOW: Set menuPlayButton to block and visible");
+        }
+
+        // Hide level selection button
+        if (menuSelectButton) {
+          menuSelectButton.style.display = "none";
+          menuSelectButton.style.visibility = "hidden";
+          console.log("FORCE SHOW: Hidden menuSelectButton");
+        }
+
+        // Setup button event handlers if they don't exist
+        if (
+          menuPlayButton &&
+          !menuPlayButton.hasAttribute("data-handler-set")
+        ) {
+          menuPlayButton.onclick = () => {
+            console.log("PLAY BUTTON: Clicked");
+            // Play selection sound
+            if (
+              game &&
+              game.assets &&
+              game.assets.audio &&
+              game.assets.audio.selection
+            ) {
+              game.assets.audio.selection.audio.play();
+            }
+
+            // Hide the buttons
+            if (menuButtons) {
+              menuButtons.style.display = "none";
+            }
+
+            // Start game
+            game.current_level = 1;
+            resetGame();
+            game.startScene("inGame");
+          };
+          menuPlayButton.setAttribute("data-handler-set", "true");
+          console.log("FORCE SHOW: Set play button handler");
+        }
+
+        if (
+          menuSelectButton &&
+          !menuSelectButton.hasAttribute("data-handler-set")
+        ) {
+          menuSelectButton.onclick = () => {
+            console.log("SELECT BUTTON: Clicked");
+            // Play selection sound
+            if (
+              game &&
+              game.assets &&
+              game.assets.audio &&
+              game.assets.audio.selection
+            ) {
+              game.assets.audio.selection.audio.play();
+            }
+
+            // Hide the buttons
+            if (menuButtons) {
+              menuButtons.style.display = "none";
+            }
+
+            // Go to level selection
+            game.startScene("levels");
+          };
+          menuSelectButton.setAttribute("data-handler-set", "true");
+          console.log("FORCE SHOW: Set select button handler");
+        }
+      }
+      // ========== END MENU BUTTONS MANAGEMENT ==========
+
       // menu scene
       let menu = new Scene("menu");
       menu.keyEvents = function (event) {
-        // Only allow Arrow Keys and Space
-        if (
-          event.code !== "ArrowUp" &&
-          event.code !== "ArrowDown" &&
-          event.code !== "ArrowLeft" &&
-          event.code !== "ArrowRight" &&
-          event.code !== "Space"
-        ) {
-          return; // Ignore other keys
-        }
-
-        if (
-          this.world.keys.ArrowDown &&
-          this.selection < this.button.length - 1
-        ) {
-          // Removed sound for navigation - this.world.assets.audio.selection.audio.play();
-          this.selection += 1;
-        } else if (this.world.keys.ArrowUp && this.selection > 0) {
-          // Removed sound for navigation - this.world.assets.audio.selection.audio.play();
-          this.selection -= 1;
-        }
-        if (this.world.keys.Space) {
-          this.world.assets.audio.selection.audio.play();
-
-          // If PLAY is selected, ensure we start from level 1
-          if (this.selection === 0) {
-            // PLAY button
-            this.world.current_level = 1;
-            resetGame();
+        // Handle Space key to start game
+        if (event.code === "Space" && event.type === "keydown") {
+          // Play selection sound
+          if (
+            game &&
+            game.assets &&
+            game.assets.audio &&
+            game.assets.audio.selection
+          ) {
+            game.assets.audio.selection.audio.play();
           }
 
-          this.world.startScene(this.button[this.selection].link);
+          // Start game
+          game.current_level = 1;
+          resetGame();
+          game.startScene("inGame");
         }
       };
 
       // Add mouse and touch support for mobile devices
       menu.mouseEvents = function (event) {
-        // Check if HTML Play button is visible - if so, ignore canvas touches
-        const menuPlayButton = document.getElementById("menuPlayButton");
-        if (menuPlayButton && menuPlayButton.style.display !== "none") {
-          return; // Let the HTML button handle the interaction
-        }
-
-        if (event.type === "click" || event.type === "touchend") {
-          let rect = this.world.canvas.getBoundingClientRect();
-          let x =
-            (event.clientX ||
-              (event.touches && event.touches[0]
-                ? event.touches[0].clientX
-                : event.changedTouches[0].clientX)) - rect.left;
-          let y =
-            (event.clientY ||
-              (event.touches && event.touches[0]
-                ? event.touches[0].clientY
-                : event.changedTouches[0].clientY)) - rect.top;
-
-          // Scale coordinates to canvas resolution
-          x = x * (this.world.W / rect.width);
-          y = y * (this.world.H / rect.height);
-
-          // Check if click is on any button
-          for (let i = 0; i < this.button.length; i++) {
-            let buttonY = this.select_pos.y + 35 + i * 45; // Updated spacing for multiple buttons
-            let buttonWidth = this.button[i].name.length * 12; // Approximate button width
-            let buttonHeight = 30; // Approximate button height
-
-            if (
-              x >= this.select_pos.x - buttonWidth / 2 &&
-              x <= this.select_pos.x + buttonWidth / 2 &&
-              y >= buttonY - buttonHeight / 2 &&
-              y <= buttonY + buttonHeight / 2
-            ) {
-              this.selection = i;
-              this.world.assets.audio.selection.audio.play();
-
-              // If PLAY is selected, ensure we start from level 1
-              if (this.selection === 0) {
-                // PLAY button
-                this.world.current_level = 1;
-                resetGame();
-              }
-
-              this.world.startScene(this.button[this.selection].link);
-              break;
-            }
-          }
-        }
+        // Menu navigation is now handled by HTML buttons
+        // This function is kept for compatibility but does nothing
+        return;
       };
       menu.init = function () {
+        console.log("MENU INIT: Starting menu initialization");
         this.init_once = true;
 
-        // Show HTML Play button for better mobile experience
-        const menuPlayButton = document.getElementById("menuPlayButton");
-        if (menuPlayButton) {
-          menuPlayButton.style.display = "block";
-
-          // Remove any existing event listeners to avoid duplicates
-          menuPlayButton.onclick = null;
-
-          // Add click/touch event listener
-          menuPlayButton.onclick = () => {
-            // Play selection sound
-            if (this.world.assets.audio && this.world.assets.audio.selection) {
-              this.world.assets.audio.selection.audio.play();
-            }
-
-            // Hide the button
-            menuPlayButton.style.display = "none";
-
-            // Start game
-            this.world.current_level = 1;
-            resetGame();
-            this.world.startScene("inGame");
-          };
-        }
+        // Force show menu buttons using our dedicated function
+        forceShowMenuButtons();
 
         // Play menu music (waves sound)
         playMenuMusic();
 
-        // custom data
-        this.button = [
-          {
-            name: "PLAY",
-            link: "inGame",
-          },
-          {
-            name: "LEVEL SELECT",
-            link: "levels",
-          },
-        ];
-        this.texteMax =
-          Math.max(...this.button.map((button) => button.name.length)) * 6;
-        this.selection = 0;
-        this.select_pos = {
-          x: this.world.W / 2,
-          y: 125, // Back to previous position
-        };
-        // cursor removed - no longer needed
         // background
         let background_image = this.world.assets.image.pattern.image;
         this.pattern = this.world.ctx.createPattern(background_image, "repeat");
@@ -3396,145 +3376,67 @@
         this.cat.playerSprite.offset = { x: 0, y: -8 };
       };
       menu.render = function () {
-        this.animatedBackground();
-        // Draw main title with high quality rendering
-        let titleImage = this.world.assets.image["main_title"].image;
-        let scaledWidth = titleImage.width / 2;
-        let scaledHeight = titleImage.height / 2;
+        // Clear canvas and draw the island background image
+        this.world.clear("black");
 
-        // Save context and enable high quality image smoothing
+        // Draw the island background image to fill the canvas
+        let backgroundImage =
+          this.world.assets.image["menu_background_island"].image;
+
         this.ctx.save();
         this.ctx.imageSmoothingEnabled = true;
         this.ctx.imageSmoothingQuality = "high";
 
-        // Draw with precise positioning to avoid sub-pixel rendering
+        // Draw the background image to fit the canvas
         this.ctx.drawImage(
-          titleImage,
+          backgroundImage,
           0,
           0,
-          titleImage.width,
-          titleImage.height, // Source dimensions
-          Math.floor(0),
-          Math.floor(0), // Destination position (integer pixels)
-          Math.floor(scaledWidth),
-          Math.floor(scaledHeight) // Destination size (integer pixels)
+          backgroundImage.width,
+          backgroundImage.height, // Source
+          0,
+          0,
+          this.world.W,
+          this.world.H // Destination: full canvas
         );
 
         this.ctx.restore();
-        this.displaySelection();
-        // notice with pirate fonts
-        this.world.ctx.fillStyle = "rgba(0,0,0,0.6)";
-        this.world.ctx.fillRect(0, this.world.H - 60, this.world.W, 50); // Increased height from 40 to 50 and adjusted Y position
 
-        // Use smaller pirate font for menu instructions
-        this.world.ctx.font = "16px 'Pirata One', sans-serif"; // Reduced from 18px to 16px
-        this.world.ctx.fillStyle = "#FFD700";
-        this.world.ctx.strokeStyle = "#8B4513";
-        this.world.ctx.lineWidth = 2;
-        this.world.ctx.textAlign = "center";
+        // Draw instruction box at bottom with semi-transparent background
+        let boxHeight = 40;
+        let boxY = this.world.H - boxHeight;
+        let centerX = this.world.W / 2;
 
-        // Arrow keys instruction
-        this.world.ctx.strokeText(
-          "Arrow keys to select",
-          this.world.W / 2,
-          this.world.H - 40
-        );
-        this.world.ctx.fillText(
-          "Arrow keys to select",
-          this.world.W / 2,
-          this.world.H - 40
-        );
+        // Draw semi-transparent black box (less opaque)
+        this.ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        this.ctx.fillRect(0, boxY, this.world.W, boxHeight);
 
-        // Space to confirm instruction
-        this.world.ctx.strokeText(
-          "[Space] to Confirm",
-          this.world.W / 2,
-          this.world.H - 20
-        );
-        this.world.ctx.fillText(
-          "[Space] to Confirm",
-          this.world.W / 2,
-          this.world.H - 20
-        );
+        // Draw subtle border on top
+        this.ctx.strokeStyle = "rgba(255, 215, 0, 0.3)"; // Gold border
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, boxY);
+        this.ctx.lineTo(this.world.W, boxY);
+        this.ctx.stroke();
+
+        // Draw instruction text
+        this.ctx.font = "12px 'Pirata One', sans-serif";
+        this.ctx.fillStyle = "#FFD700"; // Gold text
+        this.ctx.strokeStyle = "#000000";
+        this.ctx.lineWidth = 1;
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "middle";
+
+        let instructionText = 'Use arrows to move and "space" to start';
+        let textY = boxY + boxHeight / 2;
+
+        // Draw text with stroke for better readability
+        this.ctx.strokeText(instructionText, centerX, textY);
+        this.ctx.fillText(instructionText, centerX, textY);
       };
       menu.displaySelection = function () {
-        // Display the custom menu background image
-        let menuImage = this.world.assets.image["menu_background"].image;
-
-        // Calculate appropriate size and position for the menu image
-        let menuWidth = menuImage.width / 2; // Scale down to half size for better fit
-        let menuHeight = menuImage.height / 2;
-        let menuX = (this.world.W - menuWidth) / 2; // Center horizontally
-        let menuY = this.select_pos.y - 40; // Position above the buttons
-
-        // Enable smooth rendering for the menu background
-        this.ctx.save();
-        this.ctx.imageSmoothingEnabled = true;
-        this.ctx.imageSmoothingQuality = "high";
-
-        // Draw the menu background image
-        this.ctx.drawImage(
-          menuImage,
-          0,
-          0,
-          menuImage.width,
-          menuImage.height, // Source
-          menuX,
-          menuY,
-          menuWidth,
-          menuHeight // Destination
-        );
-
-        this.ctx.restore();
-
-        // Canvas button rendering enabled for testing - display multiple buttons
-        // Display the buttons text over the image with pirate fonts
-        for (i in this.button) {
-          // Set pirate font and colors for buttons
-          this.world.ctx.font = "36px 'Pirata One', sans-serif"; // Increased 50% from 24px to 36px
-          this.world.ctx.textAlign = "center";
-          this.world.ctx.lineWidth = 3; // Increased from 2 to 3 for thicker border
-
-          // Different styling based on selection
-          if (i == this.selection) {
-            // Selected button - bright gold with pulsing animation
-            let time = Date.now() * 0.003; // Slow pulsing speed
-            let pulse = (Math.sin(time) + 1) / 2; // Oscillates between 0 and 1
-
-            // Interpolate between the two colors based on pulse
-            let brightGold = "#FFD700"; // Selected color
-            let darkGold = "#B8860B"; // Base color
-
-            // Create smooth color transition
-            let r1 = parseInt(brightGold.substr(1, 2), 16);
-            let g1 = parseInt(brightGold.substr(3, 2), 16);
-            let b1 = parseInt(brightGold.substr(5, 2), 16);
-            let r2 = parseInt(darkGold.substr(1, 2), 16);
-            let g2 = parseInt(darkGold.substr(3, 2), 16);
-            let b2 = parseInt(darkGold.substr(5, 2), 16);
-
-            let r = Math.round(r2 + (r1 - r2) * pulse);
-            let g = Math.round(g2 + (g1 - g2) * pulse);
-            let b = Math.round(b2 + (b1 - b2) * pulse);
-
-            this.world.ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-            this.world.ctx.strokeStyle = "#8B4513"; // Brown shadow
-          } else {
-            // Unselected button - static dark gold
-            this.world.ctx.fillStyle = "#B8860B";
-            this.world.ctx.strokeStyle = "#2F1B14";
-          }
-
-          let title = this.button[i].name;
-          let x = this.select_pos.x;
-          let y = this.select_pos.y + 35 + i * 45; // Increased spacing for two buttons
-
-          // Draw text with outline
-          this.world.ctx.strokeText(title, x, y);
-          this.world.ctx.fillText(title, x, y);
-        }
-
-        // Cursor removed - no more hand icon pointing at buttons
+        // No canvas buttons needed - using HTML buttons instead
+        return;
       };
       menu.animatedBackground = function () {
         // Smooth ocean-like movement simulation
@@ -3733,10 +3635,10 @@
         this.userInput = true;
         this.world.initMap("map_" + this.world.current_level);
 
-        // Hide HTML Play button when entering game
-        const menuPlayButton = document.getElementById("menuPlayButton");
-        if (menuPlayButton) {
-          menuPlayButton.style.display = "none";
+        // Hide HTML menu buttons when entering game
+        const menuButtons = document.getElementById("menuButtons");
+        if (menuButtons) {
+          menuButtons.style.display = "none";
         }
 
         // Ensure pirate music is playing, but don't restart if already playing
@@ -4096,14 +3998,13 @@
           this.world.current_level = 1;
           resetGame();
 
-          // Show the HTML Play button when returning to menu
-          const menuPlayButton = document.getElementById("menuPlayButton");
-          if (menuPlayButton) {
-            menuPlayButton.style.display = "block";
-          }
-
           // Return to menu
           this.world.startScene("menu");
+
+          // Force show menu buttons immediately
+          setTimeout(() => {
+            forceShowMenuButtons();
+          }, 100);
           return false;
         }
         let win = this.cats.every((cat) => {
@@ -4173,15 +4074,13 @@
                 this.world.current_level = 1;
                 resetGame();
 
-                // Show the HTML Play button when returning to menu
-                const menuPlayButton =
-                  document.getElementById("menuPlayButton");
-                if (menuPlayButton) {
-                  menuPlayButton.style.display = "block";
-                }
-
                 // Return to menu (menu will start its own music)
                 this.world.startScene("menu");
+
+                // Force show menu buttons immediately
+                setTimeout(() => {
+                  forceShowMenuButtons();
+                }, 100);
               }
             );
           }
@@ -4301,15 +4200,13 @@
                     this.world.current_level = 1;
                     resetGame();
 
-                    // Show the HTML Play button when returning to menu
-                    const menuPlayButton =
-                      document.getElementById("menuPlayButton");
-                    if (menuPlayButton) {
-                      menuPlayButton.style.display = "block";
-                    }
-
                     // Return to menu (menu will start its own music)
                     this.world.startScene("menu");
+
+                    // Force show menu buttons immediately
+                    setTimeout(() => {
+                      forceShowMenuButtons();
+                    }, 100);
                   }
                 );
                 spawn_effect.sprite.offset.y = 0;
@@ -4477,24 +4374,44 @@
       // everything start being loaded now !
       // the ready function must be called last !
 
+      // Initialize control pad visibility on page load
+      updateControlPadVisibility("menu");
+
+      // Update control pad visibility on window resize (for device rotation)
+      window.addEventListener("resize", function () {
+        const currentScene =
+          game && game.current_scene ? game.current_scene.name : "menu";
+        updateControlPadVisibility(currentScene);
+      });
+
       // Farcade SDK: Game is ready to play
       if (window.FarcadeSDK) {
         window.FarcadeSDK.singlePlayer.actions.ready();
 
         // Handle play again requests
         window.FarcadeSDK.on("play_again", () => {
+          console.log("PLAY AGAIN: Starting play again sequence");
+
           // Reset game state and start new game
           game.current_level = 1;
-          game.score = 0;
-          levelTime = 30;
+          resetGame(); // Use the resetGame function to reset score and timer
 
-          // Show the HTML Play button when returning to menu
-          const menuPlayButton = document.getElementById("menuPlayButton");
-          if (menuPlayButton) {
-            menuPlayButton.style.display = "block";
-          }
-
+          console.log("PLAY AGAIN: About to start menu scene");
           game.startScene("menu");
+          console.log("PLAY AGAIN: Menu scene started");
+
+          // Force show menu buttons with multiple attempts
+          setTimeout(() => {
+            forceShowMenuButtons();
+          }, 50);
+
+          setTimeout(() => {
+            forceShowMenuButtons();
+          }, 200);
+
+          setTimeout(() => {
+            forceShowMenuButtons();
+          }, 500);
         });
 
         // Handle mute/unmute toggle
