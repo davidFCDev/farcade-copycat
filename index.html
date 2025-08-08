@@ -3,6 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <title>Opensea Drop</title>
+    <!-- Preload critical assets for faster loading -->
+    <link
+      rel="preload"
+      href="https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/The%20Open-Sea%20%289%29-ldKqKPyTn8Ki18H1iohz4CMPw1PFOV.png?oG0m"
+      as="image"
+    />
+    <link
+      rel="preload"
+      href="https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/demo-tileset-XdRc2ksEo7K0NQP8MMtzH0hcUz3RqS.png?Vagi"
+      as="image"
+    />
+    <link
+      rel="preload"
+      href="https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/Pirate%20Captain%20%28Idle%29-d3UCZVEll9XXrrTtsHbdqzhQfDmEqT.png?AxwH"
+      as="image"
+    />
+    <link
+      rel="preload"
+      href="https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/waves-bWs1OMPYRpODjTOSXkwhP9CNBPVEMm.mp3?01R0"
+      as="audio"
+    />
     <!-- Farcade SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@farcade/game-sdk@latest/dist/index.min.js"></script>
     <!-- Google Fonts - Pirate/Adventure Style Font -->
@@ -19,11 +40,12 @@
       }
       body {
         color: white;
-        background-color: #000;
+        background: linear-gradient(135deg, #1a1a2e, #16213e, #1e3a8a);
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        font-family: "Pirata One", sans-serif;
       }
       canvas {
         flex-shrink: 0;
@@ -73,322 +95,11 @@
         }
       }
 
-      /* Menu Buttons Container */
-      #menuButtons {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: none; /* Hidden by default */
-        flex-direction: column;
-        gap: 20px;
-        z-index: 1000;
-        pointer-events: auto;
-      }
-
-      /* Individual Menu Buttons */
-      #menuPlayButton,
-      #menuSelectButton {
-        background: transparent;
-        border: none;
-        color: #ffffff;
-        font-family: "Pirata One", sans-serif;
-        font-size: 32px;
-        text-shadow: 3px 3px 0px #000000;
-        cursor: pointer;
-        padding: 15px 30px;
-        outline: none;
-        -webkit-tap-highlight-color: transparent;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        transition: all 0.3s ease;
-        text-align: center;
-        min-width: 150px;
-      }
-
-      /* Hover and active effects */
-      #menuPlayButton:hover,
-      #menuSelectButton:hover {
-        color: #ffd700;
-        text-shadow: 3px 3px 0px #8b4513;
-        transform: scale(1.1);
-      }
-
-      #menuPlayButton:active,
-      #menuSelectButton:active {
-        transform: scale(0.95);
-        color: #b8860b;
-        text-shadow: 2px 2px 0px #2f1b14;
-      }
-
-      /* Pulsing animation for better visibility */
-      @keyframes menuButtonPulse {
-        0% {
-          color: #ffffff;
-          text-shadow: 3px 3px 0px #000000;
-        }
-        50% {
-          color: #ffd700;
-          text-shadow: 3px 3px 0px #8b4513;
-        }
-        100% {
-          color: #ffffff;
-          text-shadow: 3px 3px 0px #000000;
-        }
-      }
-
-      #menuPlayButton,
-      #menuSelectButton {
-        animation: menuButtonPulse 4s ease-in-out infinite;
-      }
-
-      /* HUD Styles - Responsive HTML elements */
-      #gameHUD {
-        position: fixed;
-        top: 25px;
-        left: 10px;
-        right: 10px;
-        display: none;
-        z-index: 1000;
-        pointer-events: none;
-      }
-
-      .hud-container {
-        display: flex;
-        justify-content: center;
-        gap: 80px;
-        align-items: flex-start;
-        width: 100%;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 0 20px;
-        box-sizing: border-box;
-      }
-
-      .hud-left {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .hud-right {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-      }
-
-      .score-display,
-      .timer-display {
-        font-family: "Pirata One", serif;
-        font-size: clamp(20px, 6vw, 40px);
-        color: #ffffff;
-        text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
-        margin: 5px 0;
-        line-height: 1;
-      }
-
-      .surrender-button {
-        background: url("https://i.postimg.cc/KYTPr4CY/redbutton.png") no-repeat
-          center;
-        background-size: contain;
-        width: clamp(45px, 10vw, 70px);
-        height: clamp(45px, 10vw, 70px);
-        border: none;
-        cursor: pointer;
-        pointer-events: auto;
-        transition: transform 0.1s;
-        margin-top: 7px;
-      }
-
-      .surrender-button:hover {
-        transform: scale(1.1);
-      }
-
-      .surrender-button:active {
-        transform: scale(0.95);
-      }
-
-      #hudCanvas {
-        display: none;
-      }
-
-      /* Hints Styles - Responsive HTML elements */
-      /*
-      #gameHints {
-        position: fixed;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: none;
-        z-index: 1000;
-        pointer-events: none;
-      }
-
-      .hints-container {
-        background: rgba(0, 0, 0, 0.7);
-        border-radius: 10px;
-        padding: 15px 25px;
-        max-width: 95vw;
-        text-align: center;
-        overflow: hidden;
-      }
-
-      .hint-text {
-        font-family: "Pirata One", serif;
-        font-size: clamp(20px, 5vw, 40px);
-        color: #ffffff;
-        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
-        margin: 0;
-        line-height: 1.2;
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .hint-text.visible {
-        opacity: 1;
-      }
-
-      #hintsCanvas {
-        display: none;
-      }
-      */
-
-      /* Control Pad Styles - Mobile game controls */
-      #controlPad {
-        position: fixed;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 160px;
-        height: 160px;
-        z-index: 1000;
-        display: none;
-      }
-
-      .control-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr 1fr;
-        width: 100%;
-        height: 100%;
-        gap: 0px;
-      }
-
-      .control-button {
-        background: rgba(0, 0, 0, 0.8);
-        border: 2px solid #444;
-        border-radius: 8px;
-        color: #fff;
-        font-size: 24px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        user-select: none;
-        touch-action: manipulation;
-        transition: all 0.1s ease;
-        cursor: pointer;
-      }
-
-      .control-button:active {
-        background: rgba(255, 255, 255, 0.3);
-        border-color: #fff;
-        transform: scale(0.95);
-      }
-
-      .control-button.active {
-        background: rgba(255, 255, 255, 0.4);
-        border-color: #fff;
-        transform: scale(0.9);
-      }
-
-      .control-button.up {
-        grid-column: 2;
-        grid-row: 1;
-      }
-
-      .control-button.left {
-        grid-column: 1;
-        grid-row: 2;
-      }
-
-      .control-button.right {
-        grid-column: 3;
-        grid-row: 2;
-      }
-
-      .control-button.down {
-        grid-column: 2;
-        grid-row: 3;
-      }
-
-      /* Control pad will be shown/hidden via JavaScript based on device type and game state */
-      #controlPad {
-        display: none;
-      }
-
-      /* Responsive adjustments */
-      @media (max-width: 600px) {
-        .hud-container {
-          padding: 0 10px;
-        }
-
-        .hints-container {
-          padding: 10px 15px;
-          margin: 0 10px;
-        }
-      }
+      /* All HUD and Control Pad styles will be created dynamically via JavaScript */
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@farcade/game-sdk@latest/dist/index.min.js"></script>
   </head>
   <body>
-    <!-- Game HUD - Score, Timer and Surrender Button -->
-    <div id="gameHUD">
-      <div class="hud-container">
-        <div class="hud-left">
-          <div class="score-display">Score: <span id="scoreValue">0</span></div>
-          <div class="timer-display">Time: <span id="timerValue">30</span></div>
-        </div>
-        <div class="hud-right">
-          <button
-            class="surrender-button"
-            id="surrenderBtn"
-            title="Surrender"
-          ></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Game Hints - Rotating hints at bottom -->
-    <!--
-    <div id="gameHints">
-      <div class="hints-container">
-        <p class="hint-text" id="hintText">Take all the coins, or not...</p>
-      </div>
-    </div>
-    -->
-
-    <!-- Control Pad for Mobile -->
-    <div id="controlPad">
-      <div class="control-grid">
-        <div class="control-button up" data-direction="up">↑</div>
-        <div class="control-button left" data-direction="left">←</div>
-        <div class="control-button right" data-direction="right">→</div>
-        <div class="control-button down" data-direction="down">↓</div>
-      </div>
-    </div>
-
-    <!-- Menu Buttons Overlay -->
-    <div id="menuButtons">
-      <button id="menuPlayButton">PLAY</button>
-      <button id="menuSelectButton">SELECT</button>
-    </div>
-
     <!-- Touch feedback indicator -->
     <div id="touchFeedback" class="touch-feedback"></div>
 
@@ -405,8 +116,7 @@
       };
       Util.array2D = function (tableau, largeur) {
         var result = [];
-        for (var i = 0; i < tableau.length; i += largeur)
-          result.push(tableau.slice(i, i + largeur));
+        for (var i = 0; i < tableau.length; i += largeur) result.push(tableau.slice(i, i + largeur));
         return result;
       };
       Util.toDio = function (array) {
@@ -426,12 +136,7 @@
       Util.lerp = function (value1, value2, amount) {
         return value1 + (value2 - value1) * amount;
       };
-      Util.linearTween = function (
-        currentTime,
-        start,
-        degreeOfChange,
-        duration
-      ) {
+      Util.linearTween = function (currentTime, start, degreeOfChange, duration) {
         return (degreeOfChange * currentTime) / duration + start;
       };
       Util.easeInOutQuad = function (t, b, c, d) {
@@ -451,38 +156,352 @@
 
       // Function to detect if the device is mobile
       function isMobileDevice() {
-        const userAgent =
-          navigator.userAgent || navigator.vendor || window.opera;
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
         // Check for mobile user agents
-        const mobileRegex =
-          /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+        const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
 
         // Check for touch capability and screen size
-        const hasTouch =
-          "ontouchstart" in window || navigator.maxTouchPoints > 0;
+        const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
         const isSmallScreen = window.innerWidth <= 768;
 
         return mobileRegex.test(userAgent) || (hasTouch && isSmallScreen);
       }
 
+      // ========== DYNAMIC HUD CREATION ==========
+      let hudElements = {
+        container: null,
+        scoreElement: null,
+        timerElement: null,
+        surrenderButton: null,
+      };
+
+      function createGameHUD() {
+        // Remove existing HUD if it exists
+        if (hudElements.container) {
+          hudElements.container.remove();
+        }
+
+        // Create main HUD container
+        hudElements.container = document.createElement("div");
+        hudElements.container.id = "gameHUD";
+        hudElements.container.style.cssText = `
+          position: fixed;
+          top: 25px;
+          left: 10px;
+          right: 10px;
+          display: none;
+          z-index: 1000;
+          pointer-events: none;
+        `;
+
+        // Create inner container
+        const hudInner = document.createElement("div");
+        hudInner.style.cssText = `
+          display: flex;
+          justify-content: center;
+          gap: 80px;
+          align-items: flex-start;
+          width: 100%;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 0 20px;
+          box-sizing: border-box;
+        `;
+
+        // Create left side (Score and Timer)
+        const hudLeft = document.createElement("div");
+        hudLeft.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        `;
+
+        // Create score display
+        const scoreDisplay = document.createElement("div");
+        scoreDisplay.style.cssText = `
+          font-family: "Pirata One", serif;
+          font-size: clamp(20px, 6vw, 40px);
+          color: #ffffff;
+          text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
+          margin: 5px 0;
+          line-height: 1;
+        `;
+        scoreDisplay.innerHTML = 'Score: <span id="scoreValue">0</span>';
+        hudElements.scoreElement = scoreDisplay;
+
+        // Create timer display
+        const timerDisplay = document.createElement("div");
+        timerDisplay.style.cssText = `
+          font-family: "Pirata One", serif;
+          font-size: clamp(20px, 6vw, 40px);
+          color: #ffffff;
+          text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
+          margin: 5px 0;
+          line-height: 1;
+        `;
+        timerDisplay.innerHTML = 'Time: <span id="timerValue">30</span>';
+        hudElements.timerElement = timerDisplay;
+
+        // Create right side (Surrender button)
+        const hudRight = document.createElement("div");
+        hudRight.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+        `;
+
+        // Create surrender button
+        hudElements.surrenderButton = document.createElement("button");
+        hudElements.surrenderButton.id = "surrenderBtn";
+        hudElements.surrenderButton.title = "Surrender";
+        hudElements.surrenderButton.style.cssText = `
+          background: url("https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/redbutton-m50kIc64V6BJZuyeQESCLuOxNHTJcg.png?lhaA") no-repeat center;
+          background-size: contain;
+          width: clamp(55px, 12vw, 85px);
+          height: clamp(55px, 12vw, 85px);
+          border: none;
+          cursor: pointer;
+          pointer-events: auto;
+          transition: transform 0.1s;
+          margin-top: 7px;
+        `;
+
+        // Add hover and active effects
+        hudElements.surrenderButton.addEventListener("mouseenter", () => {
+          hudElements.surrenderButton.style.transform = "scale(1.1)";
+        });
+        hudElements.surrenderButton.addEventListener("mouseleave", () => {
+          hudElements.surrenderButton.style.transform = "scale(1)";
+        });
+        hudElements.surrenderButton.addEventListener("mousedown", () => {
+          hudElements.surrenderButton.style.transform = "scale(0.95)";
+        });
+        hudElements.surrenderButton.addEventListener("mouseup", () => {
+          hudElements.surrenderButton.style.transform = "scale(1.1)";
+        });
+
+        // Assemble the HUD
+        hudLeft.appendChild(scoreDisplay);
+        hudLeft.appendChild(timerDisplay);
+        hudRight.appendChild(hudElements.surrenderButton);
+        hudInner.appendChild(hudLeft);
+        hudInner.appendChild(hudRight);
+        hudElements.container.appendChild(hudInner);
+
+        // Add to document
+        document.body.appendChild(hudElements.container);
+      }
+
+      // ========== DYNAMIC CONTROL PAD CREATION ==========
+      let controlPadElements = {
+        container: null,
+        buttons: [],
+      };
+
+      function createControlPad() {
+        // Only create control pad for mobile devices
+        if (!isMobileDevice()) {
+          return;
+        }
+
+        // Remove existing control pad if it exists
+        if (controlPadElements.container) {
+          controlPadElements.container.remove();
+        }
+
+        // Calculate responsive size based on screen dimensions
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        // Base size calculation - use a larger percentage of screen for better visibility
+        let padSize = Math.min(screenWidth * 0.32, screenHeight * 0.25);
+        padSize = Math.max(160, Math.min(280, padSize)); // Min 160px, Max 280px (increased from 140-220)
+
+        // Calculate font size based on pad size
+        const fontSize = Math.max(22, padSize * 0.16);
+
+        // Calculate bottom margin based on screen height (reduced by a few pixels)
+        const bottomMargin = Math.max(10, screenHeight * 0.015);
+
+        console.log("Control pad sizing:", {
+          screenWidth,
+          screenHeight,
+          padSize,
+          fontSize,
+          bottomMargin,
+        });
+
+        // Create main control pad container
+        controlPadElements.container = document.createElement("div");
+        controlPadElements.container.id = "controlPad";
+        controlPadElements.container.style.cssText = `
+          position: fixed;
+          bottom: ${bottomMargin}px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: ${padSize}px;
+          height: ${padSize}px;
+          z-index: 1000;
+          display: none;
+        `;
+
+        // Create control grid
+        const controlGrid = document.createElement("div");
+        controlGrid.style.cssText = `
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          grid-template-rows: 1fr 1fr 1fr;
+          width: 100%;
+          height: 100%;
+          gap: 4px;
+        `;
+
+        // Create control buttons
+        const buttonConfigs = [
+          { direction: "up", symbol: "↑", gridColumn: "2", gridRow: "1" },
+          { direction: "left", symbol: "←", gridColumn: "1", gridRow: "2" },
+          { direction: "right", symbol: "→", gridColumn: "3", gridRow: "2" },
+          { direction: "down", symbol: "↓", gridColumn: "2", gridRow: "3" },
+        ];
+
+        controlPadElements.buttons = [];
+
+        buttonConfigs.forEach((config) => {
+          const button = document.createElement("div");
+          button.className = `control-button ${config.direction}`;
+          button.setAttribute("data-direction", config.direction);
+          button.textContent = config.symbol;
+          button.style.cssText = `
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #444;
+            border-radius: ${Math.max(6, padSize * 0.04)}px;
+            color: #fff;
+            font-size: ${fontSize}px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: manipulation;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            grid-column: ${config.gridColumn};
+            grid-row: ${config.gridRow};
+            min-height: ${(padSize - 12) / 3}px;
+          `;
+
+          // Add touch event handlers
+          button.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleControlPadInput(config.direction);
+            button.style.background = "rgba(255, 255, 255, 0.4)";
+            button.style.borderColor = "#fff";
+            button.style.transform = "scale(0.9)";
+          });
+
+          button.addEventListener("touchend", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            button.style.background = "rgba(0, 0, 0, 0.8)";
+            button.style.borderColor = "#444";
+            button.style.transform = "scale(1)";
+          });
+
+          // Add mouse events for desktop testing on mobile
+          button.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleControlPadInput(config.direction);
+            button.style.background = "rgba(255, 255, 255, 0.4)";
+            button.style.borderColor = "#fff";
+            button.style.transform = "scale(0.9)";
+          });
+
+          button.addEventListener("mouseup", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            button.style.background = "rgba(0, 0, 0, 0.8)";
+            button.style.borderColor = "#444";
+            button.style.transform = "scale(1)";
+          });
+
+          // Prevent context menu
+          button.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+          });
+
+          controlPadElements.buttons.push(button);
+          controlGrid.appendChild(button);
+        });
+
+        controlPadElements.container.appendChild(controlGrid);
+        document.body.appendChild(controlPadElements.container);
+      }
+
+      function handleControlPadInput(direction) {
+        if (!game || !game.current_scene || game.current_scene.name !== "inGame") {
+          return;
+        }
+
+        let moveX = 0,
+          moveY = 0;
+
+        switch (direction) {
+          case "up":
+            moveY = -1;
+            break;
+          case "down":
+            moveY = 1;
+            break;
+          case "left":
+            moveX = -1;
+            break;
+          case "right":
+            moveX = 1;
+            break;
+        }
+
+        if (moveX !== 0 || moveY !== 0) {
+          console.log("Control pad input:", direction, moveX, moveY);
+          game.current_scene.moveCats(moveX, moveY);
+        }
+      }
+
       // Function to show/hide control pad based on device and game state
       function updateControlPadVisibility(currentScene) {
-        const controlPad = document.getElementById("controlPad");
-        if (!controlPad) return;
+        if (!controlPadElements.container) return;
 
         // Only show control pad if:
         // 1. It's a mobile device
         // 2. AND we're currently in the game (inGame scene)
         const shouldShow = isMobileDevice() && currentScene === "inGame";
 
-        controlPad.style.display = shouldShow ? "block" : "none";
+        controlPadElements.container.style.display = shouldShow ? "block" : "none";
 
         console.log("Control pad visibility updated:", {
           isMobile: isMobileDevice(),
           currentScene: currentScene,
           shouldShow: shouldShow,
         });
+      }
+
+      // Function to recreate control pad with new sizing (for orientation changes)
+      function recreateControlPad() {
+        if (!isMobileDevice()) return;
+
+        const wasVisible = controlPadElements.container && controlPadElements.container.style.display === "block";
+
+        // Recreate the control pad with new dimensions
+        createControlPad();
+
+        // Restore visibility if it was visible before
+        if (wasVisible && game && game.current_scene && game.current_scene.name === "inGame") {
+          updateControlPadVisibility("inGame");
+        }
+
+        console.log("Control pad recreated due to screen size change");
       }
 
       // ========== END MOBILE DETECTION AND CONTROL PAD MANAGEMENT ==========
@@ -520,12 +539,7 @@
             this.playerSprite.display();
           } else if (this.sprite === undefined) {
             this.ctx.strokeStyle = "#000";
-            this.ctx.strokeRect(
-              this.body.position.x,
-              this.body.position.y,
-              this.body.size.x,
-              this.body.size.y
-            );
+            this.ctx.strokeRect(this.body.position.x, this.body.position.y, this.body.size.x, this.body.size.y);
           } else {
             this.sprite.display();
           }
@@ -570,10 +584,7 @@
             this.tick += this.speed;
           } else {
             this.tick = 0;
-            if (
-              this.current_frame <
-              this.animations[animation_name].length - 1
-            ) {
+            if (this.current_frame < this.animations[animation_name].length - 1) {
               this.current_frame += 1;
             } else {
               this.current_frame = 0;
@@ -583,24 +594,14 @@
         display() {
           this.ctx.drawImage(
             this.image,
-            Math.floor(
-              this.animations[this.current_animation][this.current_frame] %
-                this.width
-            ) * this.size.x,
-            Math.floor(
-              this.animations[this.current_animation][this.current_frame] /
-                this.width
-            ) * this.size.y,
+            Math.floor(this.animations[this.current_animation][this.current_frame] % this.width) * this.size.x,
+            Math.floor(this.animations[this.current_animation][this.current_frame] / this.width) * this.size.y,
             this.size.x,
             this.size.y,
-            this.entity.body.position.x +
-              (this.tile_size / 2 - this.size.x / 2) +
-              this.offset.x,
-            this.entity.body.position.y +
-              (this.tile_size / 2 - this.size.x / 2) +
-              this.offset.y,
+            this.entity.body.position.x + (this.tile_size / 2 - this.size.x / 2) + this.offset.x,
+            this.entity.body.position.y + (this.tile_size / 2 - this.size.x / 2) + this.offset.y,
             this.size.x,
-            this.size.y
+            this.size.y,
           );
         }
       }
@@ -637,10 +638,7 @@
           this.idleSprite.speed = 0.15;
 
           // Walk animation: 12 frames (384x32, so each frame is 32x32)
-          this.walkSprite.addAnimation(
-            "walk",
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-          );
+          this.walkSprite.addAnimation("walk", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
           this.walkSprite.speed = 0.25;
         }
 
@@ -648,8 +646,7 @@
           // Check if entity is moving by comparing positions
           const currentPos = this.entity.body.position;
           const hasPositionChanged =
-            Math.abs(currentPos.x - this.lastPosition.x) > 0.1 ||
-            Math.abs(currentPos.y - this.lastPosition.y) > 0.1;
+            Math.abs(currentPos.x - this.lastPosition.x) > 0.1 || Math.abs(currentPos.y - this.lastPosition.y) > 0.1;
 
           // Update movement state based on translation status
           if (this.entity.inTranslation) {
@@ -670,8 +667,7 @@
 
           if (newState !== this.currentState) {
             this.currentState = newState;
-            this.currentSprite =
-              newState === "walk" ? this.walkSprite : this.idleSprite;
+            this.currentSprite = newState === "walk" ? this.walkSprite : this.idleSprite;
           }
 
           // Animate current sprite
@@ -835,7 +831,7 @@
               pos_x,
               pos_y,
               this.resolution,
-              this.resolution
+              this.resolution,
             );
           }
           let offset = this.resolution * 3;
@@ -849,7 +845,7 @@
             x + 8,
             y,
             this.resolution + width - offset,
-            this.resolution
+            this.resolution,
           );
           // bottom
           this.ctx.drawImage(
@@ -861,7 +857,7 @@
             x + 8,
             y + height - this.resolution,
             this.resolution + width - offset,
-            this.resolution
+            this.resolution,
           );
           // left
           this.ctx.drawImage(
@@ -873,7 +869,7 @@
             x,
             y + 8,
             this.resolution,
-            this.resolution + height - offset
+            this.resolution + height - offset,
           );
           // right
           this.ctx.drawImage(
@@ -885,7 +881,7 @@
             x + width - this.resolution,
             y + this.resolution,
             this.resolution,
-            this.resolution + height - offset
+            this.resolution + height - offset,
           );
         }
       }
@@ -918,8 +914,7 @@
           this.start_screen = parameters.start_screen || undefined;
           this.current_scene = "";
           // Bitmap font Data
-          this.alphabet =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ?!:',.()<>[]";
+          this.alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ?!:',.()<>[]";
           this.fonts = {};
           // Maps
           this.tile_size = parameters.tile_size || 16;
@@ -975,20 +970,50 @@
         }
         loader() {
           // increment loader
-          this.clear("#222");
           this.counter += 1;
-          let padding = 20;
-          let width = this.W - padding * 2,
-            x = padding,
-            y = this.H - padding * 2;
-          this.ctx.fillStyle = "#111";
-          this.ctx.fillRect(x, y, width, 20);
-          this.ctx.fillStyle = "#333";
-          this.ctx.fillRect(x, y, (this.counter * width) / this.toLoad, 20);
-          this.ctx.strokeStyle = "#000";
-          this.ctx.lineWidth = 4;
-          this.ctx.strokeRect(x, y, width, 20);
+
+          // Clear background
+          this.clear("#000000");
+
+          // Calculate progress
+          let progress = this.counter / this.toLoad;
+          let progressPercent = Math.round(progress * 100);
+
+          // Draw loading bar
+          let padding = 40;
+          let barWidth = this.W - padding * 2;
+          let barHeight = 25;
+          let x = padding;
+          let y = this.H / 2; // Center vertically
+
+          // Background of loading bar
+          this.ctx.fillStyle = "#1a1a1a";
+          this.ctx.fillRect(x, y, barWidth, barHeight);
+
+          // Progress fill with golden gradient
+          let gradient = this.ctx.createLinearGradient(x, y, x + barWidth, y);
+          gradient.addColorStop(0, "#B8860B");
+          gradient.addColorStop(0.5, "#DAA520");
+          gradient.addColorStop(1, "#FFD700");
+
+          this.ctx.fillStyle = gradient;
+          this.ctx.fillRect(x, y, progress * barWidth, barHeight);
+
+          // Border
+          this.ctx.strokeStyle = "#FFD700";
+          this.ctx.lineWidth = 2;
+          this.ctx.strokeRect(x, y, barWidth, barHeight);
+
+          // Loading text - centered above the bar
+          this.ctx.font = "16px 'Pirata One', sans-serif";
+          this.ctx.fillStyle = "#FFD700";
+          this.ctx.textAlign = "center";
+          this.ctx.textBaseline = "middle";
+
+          this.ctx.fillText(`Loading Sea Adventure... ${progressPercent}%`, this.W / 2, y - 30);
+
           if (this.counter === this.toLoad) {
+            console.log("🎮 All assets loaded successfully! Starting game...");
             this.launch();
           }
         }
@@ -1001,25 +1026,68 @@
           switch (obj.type) {
             case "img":
               let img = new Image();
+
+              // Add timeout for image loading
+              let imageTimeout = setTimeout(() => {
+                console.warn(`Image loading timeout: ${obj.name} - ${obj.path}`);
+                this.loader(); // Continue loading even if this image fails
+              }, 10000); // 10 second timeout
+
               img.onload = () => {
+                clearTimeout(imageTimeout);
                 this.loader();
               };
               img.onerror = () => {
-                console.log("can't load Image: " + obj.name);
+                clearTimeout(imageTimeout);
+                console.error(`Failed to load image: ${obj.name} - ${obj.path}`);
+                this.loader(); // Continue loading even if this image fails
               };
+
+              // Set crossorigin for external images
+              img.crossOrigin = "anonymous";
               img.src = obj.path;
               subject.image = img;
               this.assets.image[obj.name] = subject;
               break;
+
             case "audio":
               let audio = new Audio(obj.path);
-              audio.addEventListener("canplaythrough", this.loader());
-              audio.onerror = () => {
-                console.log("can't load audio: " + obj.name);
+
+              // Add timeout for audio loading
+              let audioTimeout = setTimeout(() => {
+                console.warn(`Audio loading timeout: ${obj.name} - ${obj.path}`);
+                this.loader(); // Continue loading even if this audio fails
+              }, 8000); // 8 second timeout
+
+              let audioLoaded = false;
+              const audioLoadHandler = () => {
+                if (!audioLoaded) {
+                  audioLoaded = true;
+                  clearTimeout(audioTimeout);
+                  this.loader();
+                }
               };
+
+              audio.addEventListener("canplaythrough", audioLoadHandler);
+              audio.addEventListener("loadeddata", audioLoadHandler);
+
+              audio.onerror = () => {
+                if (!audioLoaded) {
+                  audioLoaded = true;
+                  clearTimeout(audioTimeout);
+                  console.error(`Failed to load audio: ${obj.name} - ${obj.path}`);
+                  this.loader(); // Continue loading even if this audio fails
+                }
+              };
+
+              // Preload the audio
+              audio.preload = "auto";
+              audio.load();
+
               subject.audio = audio;
               this.assets.audio[obj.name] = subject;
               break;
+
             case undefined:
               console.log(obj.name, " doesn't have any type");
               break;
@@ -1040,7 +1108,10 @@
           });
         }
         drawBox(box_name, x, y, width, height) {
-          this.boxes[box_name].display(x, y, width, height);
+          // Check if box exists before trying to display it
+          if (this.boxes[box_name]) {
+            this.boxes[box_name].display(x, y, width, height);
+          }
         }
         // ---
         // Font manager
@@ -1111,51 +1182,28 @@
             let index = this.alphabet.indexOf(text.charAt(i)),
               clipX = size_x * index,
               posX = x + i * size_x;
-            this.ctx.drawImage(
-              font_img,
-              clipX,
-              colorID * size_y,
-              size_x,
-              size_y,
-              posX,
-              y,
-              size_x,
-              size_y
-            );
+            this.ctx.drawImage(font_img, clipX, colorID * size_y, size_x, size_y, posX, y, size_x, size_y);
           }
         }
         // -----------------
         // Events
         // -----------------
         eventSetup() {
-          document.addEventListener(
-            "keydown",
-            (event) => this.keyDown(event),
-            false
-          );
-          document.addEventListener(
-            "keyup",
-            (event) => this.keyUp(event),
-            false
-          );
+          document.addEventListener("keydown", (event) => this.keyDown(event), false);
+          document.addEventListener("keyup", (event) => this.keyUp(event), false);
 
           // Add mouse and touch events for mobile support
-          this.canvas.addEventListener(
-            "click",
-            (event) => this.mouseEvent(event),
-            false
-          );
+          this.canvas.addEventListener("click", (event) => this.mouseEvent(event), false);
 
           // Add simplified touch events for general canvas interaction
-          this.canvas.addEventListener(
-            "touchstart",
-            (event) => this.touchStart(event),
-            false
-          );
+          this.canvas.addEventListener("touchstart", (event) => this.touchStart(event), false);
           this.canvas.addEventListener(
             "touchend",
-            (event) => this.touchEnd(event),
-            false
+            (event) => {
+              event.preventDefault(); // Prevent double firing
+              this.touchEnd(event);
+            },
+            false,
           );
 
           // Initialize control pad for mobile
@@ -1172,9 +1220,7 @@
           const controlButtons = document.querySelectorAll(".control-button");
 
           // Initialize control pad visibility based on current device and scene
-          updateControlPadVisibility(
-            this.current_scene ? this.current_scene.name : "menu"
-          );
+          updateControlPadVisibility(this.current_scene ? this.current_scene.name : "menu");
 
           controlButtons.forEach((button) => {
             const direction = button.getAttribute("data-direction");
@@ -1261,8 +1307,6 @@
           const touch = event.touches[0];
           this.touchStartX = touch.clientX;
           this.touchStartY = touch.clientY;
-
-          console.log("Touch start:", this.touchStartX, this.touchStartY);
         }
 
         touchEnd(event) {
@@ -1270,7 +1314,16 @@
 
           // Handle as click for menus and buttons when not in game
           if (!this.current_scene || this.current_scene.name !== "inGame") {
-            this.mouseEvent(event);
+            // Create a synthetic mouse event from touch data for consistent handling
+            const touch = event.changedTouches[0];
+            const syntheticEvent = {
+              clientX: touch.clientX,
+              clientY: touch.clientY,
+              changedTouches: event.changedTouches,
+              touches: [], // Empty because touch has ended
+              type: "touchend",
+            };
+            this.mouseEvent(syntheticEvent);
           }
 
           // Reset touch state
@@ -1280,10 +1333,7 @@
 
         mouseEvent(event) {
           // Call mouseEvents method of current scene if it exists
-          if (
-            this.current_scene &&
-            typeof this.current_scene.mouseEvents === "function"
-          ) {
+          if (this.current_scene && typeof this.current_scene.mouseEvents === "function") {
             this.current_scene.mouseEvents(event);
           }
         }
@@ -1292,8 +1342,7 @@
         // ---
         startScene(scene_name) {
           // check if the scene exist
-          if (this.scenes[scene_name] === undefined)
-            return scene_name + " - doesn't exist";
+          if (this.scenes[scene_name] === undefined) return scene_name + " - doesn't exist";
           // request the change of scene if this.main_loop is active
           if (this.main_loop !== undefined) {
             this.requestChange.value = true;
@@ -1307,6 +1356,18 @@
 
           // Update control pad visibility based on new scene
           updateControlPadVisibility(scene_name);
+
+          // Update overlay systems based on new scene
+          updateMenuOverlay();
+          updateLevelsOverlay();
+
+          // Handle music based on scene
+          if (scene_name === "menu") {
+            // Start menu music (waves) when entering menu
+            setTimeout(() => {
+              playMenuMusic();
+            }, 100);
+          }
 
           this.initScene();
           // does this scenes needs a gameloop ?
@@ -1384,20 +1445,15 @@
         // Tile map
         // ---
         getTile(layer_id, x, y) {
-          if (x < 0 || x > this.terrain.layers[layer_id].size.x - 1)
-            return false;
-          if (y < 0 || y > this.terrain.layers[layer_id].size.y - 1)
-            return false;
-          let tile =
-            this.tiles_data[this.terrain.layers[layer_id].geometry[y][x]];
+          if (x < 0 || x > this.terrain.layers[layer_id].size.x - 1) return false;
+          if (y < 0 || y > this.terrain.layers[layer_id].size.y - 1) return false;
+          let tile = this.tiles_data[this.terrain.layers[layer_id].geometry[y][x]];
           if (tile === undefined) return false;
           return tile;
         }
         setTile(layer_id, x, y, tile_id) {
-          if (x < 0 || x > this.terrain.layers[layer_id].size.x - 1)
-            return false;
-          if (y < 0 || y > this.terrain.layers[layer_id].size.y - 1)
-            return false;
+          if (x < 0 || x > this.terrain.layers[layer_id].size.x - 1) return false;
+          if (y < 0 || y > this.terrain.layers[layer_id].size.y - 1) return false;
           this.terrain.layers[layer_id].geometry[y][x] = tile_id;
           return true;
         }
@@ -1423,8 +1479,7 @@
               y: this.terrain.layers[i].geometry.length,
             };
           }
-          this.terrain.tileset =
-            this.assets.image[this.maps[map_name].tileset].image;
+          this.terrain.tileset = this.assets.image[this.maps[map_name].tileset].image;
           this.terrain.tileset_size = {
             width: this.terrain.tileset.width / this.tile_size,
             height: this.terrain.tileset.height / this.tile_size + 1,
@@ -1442,14 +1497,11 @@
                 let tiles = this.findTile(index, parseInt(id));
                 layer.animated.push({
                   id: id,
-                  spritesheet:
-                    this.assets.image[this.tiles_data[id].spritesheet].image,
+                  spritesheet: this.assets.image[this.tiles_data[id].spritesheet].image,
                   positions: tiles,
                   current: 0,
                   steps: this.tiles_data[id].steps,
-                  max_frame:
-                    this.assets.image[this.tiles_data[id].spritesheet].image
-                      .width / this.tile_size,
+                  max_frame: this.assets.image[this.tiles_data[id].spritesheet].image.width / this.tile_size,
                 });
               }
             }
@@ -1529,11 +1581,7 @@
               } else {
                 neighbor[3] = 1;
               }
-              id =
-                1 * neighbor[0] +
-                2 * neighbor[1] +
-                4 * neighbor[2] +
-                8 * neighbor[3];
+              id = 1 * neighbor[0] + 2 * neighbor[1] + 4 * neighbor[2] + 8 * neighbor[3];
               layer.bitMask.push(id);
             }
           }
@@ -1580,13 +1628,7 @@
                   this.ctx.stroke();
 
                   // Draw the logo
-                  this.ctx.drawImage(
-                    tile.spritesheet,
-                    x,
-                    y,
-                    this.tile_size,
-                    this.tile_size
-                  );
+                  this.ctx.drawImage(tile.spritesheet, x, y, this.tile_size, this.tile_size);
 
                   this.ctx.restore();
                 } else if (tile.id == "17") {
@@ -1615,7 +1657,7 @@
                     x,
                     y,
                     this.tile_size, // scale to game tile size (16x16)
-                    this.tile_size
+                    this.tile_size,
                   );
 
                   this.ctx.restore();
@@ -1630,7 +1672,7 @@
                     x,
                     y,
                     this.tile_size,
-                    this.tile_size
+                    this.tile_size,
                   );
                 }
               });
@@ -1651,16 +1693,9 @@
               // Position of the tile :)
               let positionX = x * this.tile_size + layer.offset.x,
                 positionY = y * this.tile_size + layer.offset.y;
-              let sourceX =
-                  Math.floor(id % this.terrain.tileset_size.width) *
-                  this.tile_size,
-                sourceY =
-                  Math.floor(id / this.terrain.tileset_size.width) *
-                  this.tile_size;
-              if (
-                this.tiles_data[id] &&
-                this.tiles_data[id].look === "bitmask"
-              ) {
+              let sourceX = Math.floor(id % this.terrain.tileset_size.width) * this.tile_size,
+                sourceY = Math.floor(id / this.terrain.tileset_size.width) * this.tile_size;
+              if (this.tiles_data[id] && this.tiles_data[id].look === "bitmask") {
                 sourceX = Math.floor(layer.bitMask[y][x]) * this.tile_size;
                 sourceY = this.tiles_data[id].line * this.tile_size;
               }
@@ -1673,10 +1708,7 @@
                 sourceY = 7 * this.tile_size;
               }
 
-              if (
-                this.tiles_data[id] &&
-                this.tiles_data[id].animated === true
-              ) {
+              if (this.tiles_data[id] && this.tiles_data[id].animated === true) {
                 // hide animated sprites on the cache
                 continue;
               }
@@ -1692,7 +1724,7 @@
                 positionX,
                 positionY,
                 this.tile_size,
-                this.tile_size
+                this.tile_size,
               );
             }
           }
@@ -1710,92 +1742,62 @@
           {
             type: "img",
             name: "pirate_captain_idle",
-            path: "https://i.postimg.cc/nMbRcHGM/Pirate-Captain-Idle.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/Pirate%20Captain%20%28Idle%29-d3UCZVEll9XXrrTtsHbdqzhQfDmEqT.png?AxwH",
           },
           {
             type: "img",
             name: "pirate_captain_walk",
-            path: "https://i.postimg.cc/KvtF7jVq/Pirate-Captain-Walk.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/Pirate%20Captain%20%28Walk%29-o9HZz1cq8sTTV1GFaSKi7t9PSOrFLf.png?kxws",
           },
           {
             type: "img",
             name: "spawn_effect",
-            path: "https://image.ibb.co/njVQnT/spawn_effect.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/spawn-effect-XPG27cMg6ufUTII9XanTrw8NQ26b8W.png?vCTc",
           },
           {
             type: "img",
             name: "water_splash",
-            path: "https://image.ibb.co/jm7hZ8/water_splash.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/water-splash-32OCm8L74yn7LRBAAUWO2kx8CY6vnz.png?vErF",
           },
           {
             type: "img",
             name: "shadow",
-            path: "https://image.ibb.co/djchZ8/shadow.png",
-          },
-          {
-            type: "img",
-            name: "main_title",
-            path: "https://i.postimg.cc/Gm1h8VLy/opensea-logo.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/shadow-EW81iPoAS8NMoWBtaX1smDKBPFeEJ0.png?KUK4",
           },
           {
             type: "img",
             name: "menu_background_island",
-            path: "https://i.postimg.cc/1tKT8Qbz/THE-OPEN-SEA-6.png",
-          },
-          {
-            type: "img",
-            name: "box_texture",
-            path: "https://image.ibb.co/kpO0Mo/box.png",
-          },
-          {
-            type: "img",
-            name: "selection",
-            path: "https://image.ibb.co/fmJpE8/selection.png",
-          },
-          {
-            type: "img",
-            name: "flat_frame",
-            path: "https://image.ibb.co/hqSugo/flat_frame.png",
-          },
-          {
-            type: "img",
-            name: "pattern",
-            path: "https://i.postimg.cc/wMk6nk4Z/water.png",
-          },
-          {
-            type: "img",
-            name: "menu_background",
-            path: "https://i.postimg.cc/nccy2ZZn/pngwing-com-12.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/The%20Open-Sea%20%289%29-ldKqKPyTn8Ki18H1iohz4CMPw1PFOV.png?oG0m",
           },
           {
             type: "img",
             name: "demo_tileset",
-            path: "https://image.ibb.co/b8rLMo/demo_tileset.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/demo-tileset-XdRc2ksEo7K0NQP8MMtzH0hcUz3RqS.png?Vagi",
           },
           {
             type: "img",
             name: "exit",
-            path: "https://i.postimg.cc/Hsjjcqrh/opensea.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/opensea-XTtQ5WP96D0Xj4Z90Q6rdQJbY5w1eR.png?CSSG",
           },
           {
             type: "img",
             name: "water_sprite",
-            path: "https://image.ibb.co/cSFEgo/water_sprite.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/water-sprite-WK70krNHiVKN27EYGHmhulFC6ADqA7.png?BkTF",
           },
           {
             type: "img",
             name: "dust_effect",
-            path: "https://image.ibb.co/mKy0Mo/dust.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/dust-xu96vCZnezAnvBdOGUECteaPerPzhR.png?h3rX",
           },
           {
             type: "img",
             name: "coin_sprite",
-            path: "https://i.postimg.cc/jdKmMf0V/coin.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/coin-p9L1iH5QesSoxJnawnk44d0gGZ5sJ1.png?kPeD",
           },
           {
             type: "img",
             name: "surrender_button",
-            path: "https://i.postimg.cc/KYTPr4CY/redbutton.png",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/redbutton-m50kIc64V6BJZuyeQESCLuOxNHTJcg.png?lhaA",
           },
           // Audio
           {
@@ -1806,7 +1808,7 @@
           {
             type: "audio",
             name: "selection",
-            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/exit-Wo1n7ZwfI9XI86Ts2dqx3QfcpWwaw1.mp3?nz0F",
+            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/collectcoin-6075-rjrkxbNHSsH3QzqnurDamQrx3K87pQ.mp3?vsYo",
           },
           {
             type: "audio",
@@ -1828,16 +1830,6 @@
             name: "pirate1",
             path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/pirate1-6BrzaKv8igJ1h5IJa3phuLnB0fCX6V.mp3?LPuj",
           },
-          {
-            type: "audio",
-            name: "pirate2",
-            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/pirate2-8lCFdORuSCzXZCZuW1XFcFFX8ONXPK.mp3?BE5D",
-          },
-          {
-            type: "audio",
-            name: "pirate3",
-            path: "https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/pirate3-aDQYxQ22RFTy38OUPgzf6Q7Tib4WHY.mp3?V3je",
-          },
 
           // No bitmap fonts needed - using Google Fonts instead
         ],
@@ -1845,23 +1837,7 @@
           // All fonts now use Google Fonts (Pirata One, etc.)
         ],
         // box system
-        boxes: [
-          {
-            name: "box",
-            resolution: 8,
-            image: "box_texture",
-          },
-          {
-            name: "selection",
-            resolution: 8,
-            image: "selection",
-          },
-          {
-            name: "flat_frame",
-            resolution: 8,
-            image: "flat_frame",
-          },
-        ],
+        boxes: [],
         tiles: [
           { name: "empty", id: 0, collision: false, visibility: false },
           { name: "water", id: 1, collision: false, look: "square", line: 7 },
@@ -2430,12 +2406,12 @@
                   [0, 3, 0, 3, 3, 0, 0, 3, 3, 3, 3, 0, 0, 3, 0, 0],
                   [0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0],
                   [0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 0],
-                  [0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0],
+                  [0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0],
                   [0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 3, 0],
                   [0, 0, 3, 0, 0, 3, 3, 3, 3, 0, 0, 3, 0, 0, 3, 0],
                   [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
-                  [0, 3, 0, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 0, 0],
+                  [0, 3, 0, 0, 3, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0],
+                  [0, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0],
                   [0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0],
                   [0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0],
                   [0, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0],
@@ -2596,9 +2572,9 @@
           {
             name: "map_12",
             tileset: "demo_tileset",
-            // Triple Track Challenge - 3 pistas cerradas independientes
+            // Team Rocket Hideout Style - Ice sliding puzzle maze with single pirate
             layers: [
-              // ground layer - 3 pistas de terreno sólido
+              // ground layer - todo terreno sólido
               {
                 name: "ground",
                 offset: {
@@ -2606,25 +2582,25 @@
                   y: 4,
                 },
                 geometry: [
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 3, 3, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+                  [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
                 ],
               },
-              // 3 pistas con rutas directas garantizadas - diseño simplificado para asegurar completabilidad
+              // ice maze layer - Team Rocket style con impulsadores direccionales
               {
                 name: "onGround",
                 offset: {
@@ -2632,30 +2608,24 @@
                   y: 0,
                 },
                 geometry: [
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [
-                    0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
-                    0,
-                  ],
-                  [0, 11, 7, 0, 0, 0, 7, 0, 0, 0, 0, 7, 0, 0, 11, 0], // spawns en columnas 2, 6, 11
-                  [0, 11, 0, 5, 0, 0, 0, 4, 0, 0, 0, 0, 5, 0, 11, 0], // obstáculos en columnas 3, 7, 12 (no bloquean rutas)
-                  [0, 11, 0, 0, 17, 0, 0, 0, 5, 0, 0, 0, 0, 4, 11, 0], // monedas y obstáculos laterales
-                  [0, 11, 0, 4, 0, 0, 0, 5, 0, 0, 0, 0, 4, 0, 11, 0], // rutas 2, 6, 11 libres
-                  [0, 11, 0, 0, 5, 0, 0, 0, 17, 0, 0, 0, 0, 5, 11, 0], // obstáculos solo en columnas alternas
-                  [0, 11, 0, 17, 0, 0, 0, 4, 0, 0, 0, 0, 17, 0, 11, 0], // monedas accesibles lateralmente
-                  [0, 11, 0, 5, 0, 0, 0, 0, 4, 0, 0, 0, 5, 0, 11, 0], // mantener rutas principales libres
-                  [0, 11, 0, 0, 4, 0, 0, 5, 0, 0, 0, 0, 0, 4, 11, 0], // obstáculos dispersos
-                  [0, 11, 0, 17, 0, 0, 0, 0, 5, 0, 0, 0, 17, 0, 11, 0], // más monedas laterales
-                  [0, 11, 0, 4, 0, 0, 0, 17, 0, 0, 0, 0, 4, 0, 11, 0], // obstáculos que no bloquean
-                  [0, 11, 0, 0, 5, 0, 0, 0, 4, 0, 0, 0, 0, 5, 11, 0], // penúltima fila con ruta libre
-                  [0, 11, 8, 0, 0, 0, 8, 0, 0, 0, 0, 8, 0, 0, 11, 0], // exits en columnas 2, 6, 11
-                  [
-                    0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
-                    0,
-                  ],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                  [4, 7, 6, 14, 6, 6, 13, 6, 6, 14, 6, 6, 14, 17, 6, 4],
+                  [4, 6, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 12, 4, 4],
+                  [4, 6, 14, 6, 6, 15, 6, 6, 13, 6, 6, 4, 6, 6, 6, 4],
+                  [4, 4, 6, 6, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4],
+                  [4, 6, 6, 13, 6, 17, 6, 14, 6, 6, 6, 15, 6, 15, 6, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4],
+                  [4, 14, 6, 6, 6, 6, 4, 6, 4, 4, 6, 6, 6, 6, 13, 4],
+                  [4, 6, 6, 6, 12, 6, 6, 6, 15, 6, 12, 6, 6, 6, 6, 4],
+                  [4, 6, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 6, 6, 4],
+                  [4, 13, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 12, 4],
+                  [4, 6, 6, 6, 6, 12, 6, 6, 6, 13, 6, 6, 6, 6, 6, 4],
+                  [4, 6, 6, 15, 6, 6, 6, 6, 6, 6, 6, 14, 6, 17, 6, 4],
+                  [4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4],
+                  [4, 6, 6, 6, 6, 6, 13, 6, 6, 14, 6, 6, 6, 6, 8, 4],
+                  [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                 ],
-              }, // triple track layer
+              }, // ice maze layer
             ],
           },
 
@@ -2701,7 +2671,7 @@
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                   [4, 7, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 8, 4],
                   [4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4],
-                  [4, 0, 0, 0, 0, 17, 0, 0, 0, 17, 0, 0, 0, 0, 0, 4],
+                  [4, 0, 0, 0, 0, 17, 0, 0, 0, 17, 5, 0, 0, 0, 0, 4],
                   [4, 0, 4, 5, 4, 4, 4, 0, 4, 4, 4, 5, 4, 0, 4, 4],
                   [4, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 4],
                   [4, 4, 4, 0, 4, 0, 4, 4, 4, 0, 4, 0, 4, 4, 4, 4],
@@ -2709,7 +2679,7 @@
                   [4, 4, 4, 0, 4, 0, 4, 4, 4, 0, 4, 0, 4, 4, 4, 4],
                   [4, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 4],
                   [4, 0, 4, 5, 4, 4, 4, 0, 4, 4, 4, 5, 4, 0, 4, 4],
-                  [4, 0, 0, 0, 0, 17, 0, 0, 0, 17, 0, 0, 0, 0, 0, 4],
+                  [4, 0, 0, 0, 0, 17, 0, 0, 0, 17, 5, 0, 0, 0, 0, 4],
                   [4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4],
                   [4, 7, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 8, 4],
                   [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
@@ -2745,11 +2715,7 @@
 
         for (let y = 0; y < ground.geometry.length; y++) {
           for (let x = 0; x < ground.geometry[0].length; x++) {
-            if (
-              y - 1 > 0 &&
-              ground.geometry[y][x] !== 3 &&
-              ground.geometry[y - 1][x] == 3
-            ) {
+            if (y - 1 > 0 && ground.geometry[y][x] !== 3 && ground.geometry[y - 1][x] == 3) {
               ground.geometry[y][x] = 2;
             }
           }
@@ -2775,18 +2741,10 @@
             if (ground.geometry[y][x] !== 3 && ground.geometry[y][x - 1] == 3) {
               water.geometry[y][x] = 1;
             }
-            if (
-              y + 1 < water.geometry.length &&
-              ground.geometry[y][x] !== 3 &&
-              ground.geometry[y + 1][x] == 3
-            ) {
+            if (y + 1 < water.geometry.length && ground.geometry[y][x] !== 3 && ground.geometry[y + 1][x] == 3) {
               water.geometry[y][x] = 1;
             }
-            if (
-              y - 1 > 0 &&
-              ground.geometry[y][x] !== 3 &&
-              ground.geometry[y - 1][x] == 3
-            ) {
+            if (y - 1 > 0 && ground.geometry[y][x] !== 3 && ground.geometry[y - 1][x] == 3) {
               water.geometry[y][x] = 1;
             }
           }
@@ -2800,6 +2758,873 @@
           }
         }
       });
+
+      // ========== HTML OVERLAY SYSTEM FOR PRECISE TOUCH ==========
+      let menuOverlayElements = {
+        container: null,
+        background: null,
+        title: null,
+        playButton: null,
+        selectButton: null,
+        instructionsButton: null,
+        closeButton: null,
+      };
+
+      let levelsOverlayElements = {
+        container: null,
+        levelButtons: [],
+        backButton: null,
+      };
+
+      let instructionsOverlayElements = {
+        container: null,
+        closeButton: null,
+      };
+
+      function createMenuOverlay() {
+        // Remove existing overlay if it exists
+        if (menuOverlayElements.container) {
+          menuOverlayElements.container.remove();
+        }
+
+        // Create main container using same approach as control pad
+        menuOverlayElements.container = document.createElement("div");
+        menuOverlayElements.container.id = "menuOverlay";
+        menuOverlayElements.container.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1000;
+          display: none;
+        `;
+
+        // Helper function to create responsive button
+        function createResponsiveButton(id, text, callback) {
+          const button = document.createElement("div");
+          button.id = id;
+          button.textContent = text;
+          button.style.cssText = `
+            position: fixed;
+            background: transparent;
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            font-family: "Pirata One", sans-serif;
+            font-weight: bold;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            transition: all 0.2s ease;
+            z-index: 1001;
+          `;
+
+          // Add touch events
+          button.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            button.style.transform = "scale(0.95)";
+            button.style.background = "rgba(255, 215, 0, 0.2)";
+          });
+
+          button.addEventListener("touchend", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            button.style.transform = "scale(1)";
+            button.style.background = "transparent";
+
+            // Hide menu overlay immediately
+            menuOverlayElements.container.style.display = "none";
+            callback();
+          });
+
+          button.addEventListener("touchcancel", (e) => {
+            e.preventDefault();
+            button.style.transform = "scale(1)";
+            button.style.background = "transparent";
+          });
+
+          // Add click events for desktop
+          button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Hide menu overlay immediately
+            menuOverlayElements.container.style.display = "none";
+            callback();
+          });
+
+          // Prevent context menu
+          button.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+          });
+
+          return button;
+        }
+
+        // Create background image
+        menuOverlayElements.background = document.createElement("div");
+        menuOverlayElements.background.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: url("https://lqy3lriiybxcejon.public.blob.vercel-storage.com/6d6bc837-fad6-47ee-91cd-cdfeb472750a/The%20Open-Sea%20%289%29-ldKqKPyTn8Ki18H1iohz4CMPw1PFOV.png?oG0m");
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          pointer-events: none;
+          user-select: none;
+          z-index: 500;
+        `;
+
+        // Create buttons with callbacks
+        menuOverlayElements.playButton = createResponsiveButton("playOverlay", "PLAY", () => {
+          game.current_level = 1;
+          resetGame();
+          game.startScene("inGame");
+        });
+
+        menuOverlayElements.selectButton = createResponsiveButton("selectOverlay", "SELECT", () => {
+          // Explicitly hide menu overlay
+          menuOverlayElements.container.style.display = "none";
+          game.startScene("levels");
+        });
+
+        menuOverlayElements.instructionsButton = createResponsiveButton("instructionsOverlay", "INSTRUCTIONS", () => {
+          game.scenes.menu.showInstructions();
+        });
+
+        // Create instructions info text
+        menuOverlayElements.instructionsInfo = document.createElement("div");
+        menuOverlayElements.instructionsInfo.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          color: #FFD700;
+          font-family: "Pirata One", sans-serif;
+          font-size: 12px;
+          text-align: center;
+          display: none;
+          z-index: 1003;
+        `;
+        menuOverlayElements.instructionsInfo.textContent = "Close with Back button or press X key";
+
+        // Create instructional text box (like a button but non-interactive)
+        menuOverlayElements.instructionalText = document.createElement("div");
+        menuOverlayElements.instructionalText.textContent = 'Use arrows to move and "space" to start';
+        menuOverlayElements.instructionalText.style.cssText = `
+          position: fixed;
+          background: rgba(0, 0, 0, 0.4);
+          color: #FFD700;
+          border: none;
+          border-radius: 0;
+          font-family: "Pirata One", sans-serif;
+          font-weight: bold;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: none;
+          user-select: none;
+          z-index: 1001;
+          padding: 18px 0;
+          font-size: 14px;
+        `;
+
+        // Add background and buttons to container
+        menuOverlayElements.container.appendChild(menuOverlayElements.background);
+        menuOverlayElements.container.appendChild(menuOverlayElements.playButton);
+        menuOverlayElements.container.appendChild(menuOverlayElements.selectButton);
+        menuOverlayElements.container.appendChild(menuOverlayElements.instructionsButton);
+        menuOverlayElements.container.appendChild(menuOverlayElements.instructionsInfo);
+        menuOverlayElements.container.appendChild(menuOverlayElements.instructionalText);
+
+        // Add to document
+        document.body.appendChild(menuOverlayElements.container);
+
+        // Initial update
+        updateMenuOverlay();
+      }
+
+      function updateMenuOverlay() {
+        if (!menuOverlayElements.container) return;
+        if (!game || !game.scenes || !game.scenes.menu) return;
+
+        const menu = game.scenes.menu;
+
+        // Update container visibility
+        menuOverlayElements.container.style.display =
+          game.current_scene && game.current_scene.name === "menu" ? "block" : "none";
+
+        if (!game.current_scene || game.current_scene.name !== "menu") {
+          // Ensure menu is completely hidden when not in menu scene
+          return;
+        }
+
+        // Get canvas position and dimensions for positioning within game area
+        const canvas = game.canvas;
+        const canvasRect = canvas.getBoundingClientRect();
+        const canvasLeft = canvasRect.left;
+        const canvasTop = canvasRect.top;
+        const canvasWidth = canvasRect.width;
+        const canvasHeight = canvasRect.height;
+        const canvasCenterX = canvasLeft + canvasWidth / 2;
+
+        // Use screen-based positioning for buttons (centered on screen)
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const screenCenterX = screenWidth / 2;
+
+        // Fixed button width for consistency and better centering
+        const buttonWidth = 180; // Fixed width for all buttons
+        const buttonHeight = Math.min(40, screenHeight * 0.06); // Reduced height
+        const fontSize = Math.min(16, buttonHeight * 0.4);
+
+        // Center buttons in the middle of the screen (both X and Y)
+        const startY = screenHeight * 0.45 - buttonHeight; // Moved up slightly
+        const spacing = buttonHeight + 12; // Reduced spacing between buttons
+
+        // Button positions
+        const playY = startY;
+        const selectY = startY + spacing;
+        const instructionsY = startY + spacing * 2;
+
+        // Get current selection for desktop styling
+        const selectedButton =
+          game.scenes.menu && game.scenes.menu.selectedButton !== undefined ? game.scenes.menu.selectedButton : 0;
+        const isMobile = isMobileDevice();
+
+        // Update instructional text position (55px below the last button)
+        const instructionalText = menuOverlayElements.instructionalText;
+        if (instructionalText) {
+          const textBottomY = instructionsY + buttonHeight + 55; // 55px below last button (40 + 15)
+          instructionalText.style.left = `0px`; // Full width
+          instructionalText.style.top = `${textBottomY}px`;
+          instructionalText.style.width = `100%`; // Full screen width
+          instructionalText.style.bottom = "auto"; // Remove bottom positioning
+        }
+
+        // Force absolute positioning from screen coordinates
+        // Update PLAY button with screen-based positioning
+        const playButton = menuOverlayElements.playButton;
+        playButton.style.position = "fixed";
+        playButton.style.left = `${screenCenterX - buttonWidth / 2}px`;
+        playButton.style.top = `${playY}px`;
+        playButton.style.width = `${buttonWidth}px`;
+        playButton.style.height = `${buttonHeight}px`;
+        playButton.style.fontSize = `${fontSize}px`;
+        playButton.style.transform = "none"; // Reset any transforms
+
+        // Apply desktop/mobile specific styling
+        if (isMobile) {
+          playButton.style.color = "#FFD700";
+          playButton.style.border = "2px solid #FFD700";
+        } else {
+          if (selectedButton === 0) {
+            playButton.style.color = "#FFD700";
+            playButton.style.border = "none";
+            playButton.style.background = "transparent";
+            playButton.style.fontSize = `${fontSize * 1.3}px`; // Much larger for selected
+          } else {
+            playButton.style.color = "#000000";
+            playButton.style.border = "none";
+            playButton.style.background = "transparent";
+            playButton.style.fontSize = `${fontSize}px`; // Normal size for unselected
+          }
+        }
+
+        // Update SELECT button
+        const selectButton = menuOverlayElements.selectButton;
+        selectButton.style.position = "fixed";
+        selectButton.style.left = `${screenCenterX - buttonWidth / 2}px`;
+        selectButton.style.top = `${selectY}px`;
+        selectButton.style.width = `${buttonWidth}px`;
+        selectButton.style.height = `${buttonHeight}px`;
+        selectButton.style.fontSize = `${fontSize}px`;
+        selectButton.style.transform = "none"; // Reset any transforms
+
+        if (isMobile) {
+          selectButton.style.color = "#FFD700";
+          selectButton.style.border = "2px solid #FFD700";
+        } else {
+          if (selectedButton === 1) {
+            selectButton.style.color = "#FFD700";
+            selectButton.style.border = "none";
+            selectButton.style.background = "transparent";
+            selectButton.style.fontSize = `${fontSize * 1.3}px`; // Much larger for selected
+          } else {
+            selectButton.style.color = "#000000";
+            selectButton.style.border = "none";
+            selectButton.style.background = "transparent";
+            selectButton.style.fontSize = `${fontSize}px`; // Normal size for unselected
+          }
+        }
+
+        // Update INSTRUCTIONS button
+        const instructionsButton = menuOverlayElements.instructionsButton;
+        instructionsButton.style.position = "fixed";
+        instructionsButton.style.left = `${screenCenterX - buttonWidth / 2}px`;
+        instructionsButton.style.top = `${instructionsY}px`;
+        instructionsButton.style.width = `${buttonWidth}px`;
+        instructionsButton.style.height = `${buttonHeight}px`;
+        instructionsButton.style.fontSize = `${fontSize}px`;
+        instructionsButton.style.transform = "none"; // Reset any transforms
+
+        if (isMobile) {
+          instructionsButton.style.color = "#FFD700";
+          instructionsButton.style.border = "2px solid #FFD700";
+        } else {
+          if (selectedButton === 2) {
+            instructionsButton.style.color = "#FFD700";
+            instructionsButton.style.border = "none";
+            instructionsButton.style.background = "transparent";
+            instructionsButton.style.fontSize = `${fontSize * 1.3}px`; // Much larger for selected
+          } else {
+            instructionsButton.style.color = "#000000";
+            instructionsButton.style.border = "none";
+            instructionsButton.style.background = "transparent";
+            instructionsButton.style.fontSize = `${fontSize}px`; // Normal size for unselected
+          }
+        }
+
+        // Update instructions overlay
+        updateInstructionsOverlay();
+
+        // Instructional text now has fixed positioning and doesn't need updates
+      }
+
+      function createLevelsOverlay() {
+        // Remove any existing overlays (including orphaned ones)
+        const existingOverlays = document.querySelectorAll("#levelsOverlay");
+        existingOverlays.forEach((overlay) => overlay.remove());
+
+        // Remove existing overlay if it exists in our reference
+        if (levelsOverlayElements.container) {
+          levelsOverlayElements.container.remove();
+          levelsOverlayElements.container = null;
+        }
+
+        // Clear any existing level buttons references
+        levelsOverlayElements.levelButtons = [];
+
+        // Create main container
+        levelsOverlayElements.container = document.createElement("div");
+        levelsOverlayElements.container.id = "levelsOverlay";
+        levelsOverlayElements.container.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          pointer-events: none;
+          z-index: 1500;
+          display: none;
+        `;
+
+        // Add to document
+        document.body.appendChild(levelsOverlayElements.container);
+      }
+
+      function updateLevelsOverlay() {
+        if (!levelsOverlayElements.container) return;
+        if (!game || !game.scenes || !game.scenes.levels) return;
+
+        // Update container visibility
+        levelsOverlayElements.container.style.display =
+          game.current_scene && game.current_scene.name === "levels" ? "block" : "none";
+
+        if (!game.current_scene || game.current_scene.name !== "levels") return;
+
+        // Clear the entire container content to prevent duplicates
+        levelsOverlayElements.container.innerHTML = "";
+
+        // Clear existing level buttons array
+        levelsOverlayElements.levelButtons = [];
+
+        // Use screen-based positioning like the control pad
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const isMobile = isMobileDevice();
+
+        // Create levels container box
+        const levelsContainer = document.createElement("div");
+        levelsContainer.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0, 0, 0, 0.8);
+          border: 3px solid #FFD700;
+          border-radius: 12px;
+          padding: 30px;
+          z-index: 1001;
+          backdrop-filter: blur(5px);
+          width: 90%;
+          max-width: 600px;
+          max-height: 80%;
+          box-sizing: border-box;
+        `;
+
+        // Create title
+        const title = document.createElement("h2");
+        title.textContent = "SELECT LEVEL";
+        title.style.cssText = `
+          color: #FFD700;
+          font-family: "Pirata One", sans-serif;
+          font-size: 24px;
+          margin: 0 0 20px 0;
+          text-align: center;
+        `;
+        levelsContainer.appendChild(title);
+
+        // Create grid container for levels
+        const gridContainer = document.createElement("div");
+        gridContainer.style.cssText = `
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          grid-template-rows: repeat(4, 1fr);
+          gap: 15px;
+          margin-bottom: 20px;
+        `;
+
+        // Calculate responsive grid layout - made bigger to use more space
+        const gridCols = 5;
+        const gridRows = 4;
+        const levelButtonSize = Math.min(70, Math.min(screenWidth, screenHeight) / 10);
+
+        // Get current selection for desktop styling
+        const selectedLevel =
+          game.scenes.levels && game.scenes.levels.selection !== undefined ? game.scenes.levels.selection : 0;
+
+        // Create level buttons
+        const show = Math.min(game.mapsMax, 20);
+        for (let i = 0; i < show; i++) {
+          const level_id = i + 20 * Math.floor(selectedLevel / 20);
+
+          const levelButton = document.createElement("div");
+          levelButton.textContent = (level_id + 1).toString();
+
+          // Determine if this level should be highlighted (desktop selection)
+          const isSelected = !isMobile && selectedLevel === level_id;
+
+          levelButton.style.cssText = `
+            width: ${levelButtonSize}px;
+            height: ${levelButtonSize}px;
+            background: ${isSelected ? "#FFD700" : "transparent"};
+            color: ${isSelected ? "#8B4513" : "#FFFFFF"};
+            border: 2px solid ${isSelected ? "#8B4513" : "#FFD700"};
+            border-radius: 8px;
+            font-family: "Pirata One", sans-serif;
+            font-size: ${Math.min(18, levelButtonSize * 0.25)}px;
+            font-weight: bold;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            transition: all 0.1s ease;
+          `;
+
+          // Add touch effects (no hover effects for desktop)
+          levelButton.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            levelButton.style.transform = "scale(0.9)";
+          });
+
+          levelButton.addEventListener("touchend", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            levelButton.style.transform = "scale(1)";
+
+            // Hide levels overlay immediately and start the selected level
+            levelsOverlayElements.container.style.display = "none";
+            game.current_level = level_id + 1;
+            ensurePirateMusicPlaying();
+            game.startScene("inGame");
+          });
+
+          levelButton.addEventListener("touchcancel", (e) => {
+            e.preventDefault();
+            levelButton.style.transform = "scale(1)";
+          });
+
+          levelButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Hide levels overlay immediately and start the selected level
+            levelsOverlayElements.container.style.display = "none";
+            game.current_level = level_id + 1;
+            ensurePirateMusicPlaying();
+            game.startScene("inGame");
+          });
+
+          // Prevent context menu
+          levelButton.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+          });
+
+          levelsOverlayElements.levelButtons.push(levelButton);
+          gridContainer.appendChild(levelButton);
+        }
+
+        levelsContainer.appendChild(gridContainer);
+
+        // Create instruction text
+        const instructionText = document.createElement("div");
+        instructionText.style.cssText = `
+          color: #FFD700;
+          font-family: "Pirata One", sans-serif;
+          font-size: 14px;
+          text-align: center;
+          margin-bottom: 15px;
+        `;
+
+        if (isMobile) {
+          instructionText.textContent = "Tap a level to play";
+        } else {
+          instructionText.textContent = "Use arrows to select, Space to confirm";
+        }
+        levelsContainer.appendChild(instructionText);
+
+        // Create back button
+        const backButton = document.createElement("div");
+        backButton.textContent = "BACK TO MENU";
+        backButton.style.cssText = `
+          background: transparent;
+          color: #FFD700;
+          border: 2px solid #FFD700;
+          border-radius: 8px;
+          font-family: "Pirata One", sans-serif;
+          font-size: 16px;
+          font-weight: bold;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: auto;
+          cursor: pointer;
+          user-select: none;
+          touch-action: manipulation;
+          transition: all 0.1s ease;
+          padding: 12px 24px;
+          margin: 0 auto;
+        `;
+
+        // Add events to back button
+        backButton.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          backButton.style.transform = "scale(0.95)";
+        });
+
+        backButton.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          backButton.style.transform = "scale(1)";
+          levelsOverlayElements.container.style.display = "none";
+          game.startScene("menu");
+          // Ensure menu buttons are visible
+          setTimeout(() => {
+            updateMenuOverlay();
+          }, 50);
+        });
+
+        backButton.addEventListener("touchcancel", (e) => {
+          e.preventDefault();
+          backButton.style.transform = "scale(1)";
+        });
+
+        backButton.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          levelsOverlayElements.container.style.display = "none";
+          game.startScene("menu");
+          // Ensure menu buttons are visible
+          setTimeout(() => {
+            updateMenuOverlay();
+          }, 50);
+        });
+
+        levelsContainer.appendChild(backButton);
+        levelsOverlayElements.container.appendChild(levelsContainer);
+      }
+
+      function recreateMenuOverlay() {
+        const wasVisible = menuOverlayElements.container && menuOverlayElements.container.style.display === "block";
+
+        createMenuOverlay();
+
+        if (wasVisible && game && game.current_scene && game.current_scene.name === "menu") {
+          updateMenuOverlay();
+        }
+      }
+
+      function recreateLevelsOverlay() {
+        const wasVisible = levelsOverlayElements.container && levelsOverlayElements.container.style.display === "block";
+
+        createLevelsOverlay();
+
+        if (wasVisible && game && game.current_scene && game.current_scene.name === "levels") {
+          updateLevelsOverlay();
+        }
+      }
+
+      function createInstructionsOverlay() {
+        // Remove existing overlay if it exists
+        if (instructionsOverlayElements.container) {
+          instructionsOverlayElements.container.remove();
+        }
+
+        // Create main container
+        instructionsOverlayElements.container = document.createElement("div");
+        instructionsOverlayElements.container.id = "instructionsOverlay";
+        instructionsOverlayElements.container.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          pointer-events: none;
+          z-index: 1000;
+          display: none;
+        `;
+
+        // Add to document
+        document.body.appendChild(instructionsOverlayElements.container);
+      }
+
+      function updateInstructionsOverlay() {
+        if (!instructionsOverlayElements.container) return;
+        if (!game || !game.scenes || !game.scenes.menu) return;
+
+        const menu = game.scenes.menu;
+
+        // Update container visibility
+        instructionsOverlayElements.container.style.display = menu.showingInstructions ? "block" : "none";
+
+        if (!menu.showingInstructions) return;
+
+        // Clear existing content
+        instructionsOverlayElements.container.innerHTML = "";
+
+        // Use screen-based positioning like the levels overlay
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const isMobile = isMobileDevice();
+
+        // Create instructions container box
+        const instructionsContainer = document.createElement("div");
+        instructionsContainer.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0, 0, 0, 0.8);
+          border: 3px solid #FFD700;
+          border-radius: 12px;
+          padding: 30px;
+          z-index: 1001;
+          backdrop-filter: blur(5px);
+          width: 90%;
+          max-width: 600px;
+          max-height: 80%;
+          box-sizing: border-box;
+        `;
+
+        // Create title
+        const title = document.createElement("h2");
+        title.textContent = "GAME INSTRUCTIONS";
+        title.style.cssText = `
+          color: #FFD700;
+          font-family: "Pirata One", sans-serif;
+          font-size: 24px;
+          margin: 0 0 20px 0;
+          text-align: center;
+        `;
+        instructionsContainer.appendChild(title);
+
+        // Create instructions content
+        const instructionsContent = document.createElement("div");
+        instructionsContent.style.cssText = `
+          color: #FFFFFF;
+          font-family: "Pirata One", sans-serif;
+          font-size: 14px;
+          line-height: 1.6;
+          margin-bottom: 20px;
+          text-align: left;
+          width: 100%;
+          white-space: nowrap;
+          overflow: visible;
+        `;
+
+        instructionsContent.innerHTML = `
+          <p>1. Collect coins and take the OpenSea portal</p>
+          <p>2. Escape quickly to earn more points</p>
+          <p>3. Coins give you points - collect them all!</p>
+          <p>4. If you fall into water, you lose</p>
+          <p>5. Press red button (X Key) to surrender</p>
+          <p>6. Complete levels to unlock new challenges</p>
+        `;
+        instructionsContainer.appendChild(instructionsContent);
+
+        // Create close X button (top right corner)
+        const closeButton = document.createElement("div");
+        closeButton.textContent = "✕";
+        closeButton.style.cssText = `
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          color: #FFD700;
+          font-family: "Pirata One", sans-serif;
+          font-size: 16px;
+          font-weight: bold;
+          cursor: pointer;
+          pointer-events: auto;
+          user-select: none;
+          touch-action: manipulation;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `;
+
+        // Add events to close button
+        closeButton.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          game.scenes.menu.hideInstructions();
+          // Ensure menu buttons are visible
+          setTimeout(() => {
+            updateMenuOverlay();
+          }, 50);
+        });
+
+        closeButton.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          game.scenes.menu.hideInstructions();
+          // Ensure menu buttons are visible
+          setTimeout(() => {
+            updateMenuOverlay();
+          }, 50);
+        });
+
+        instructionsContainer.appendChild(closeButton);
+
+        // Create instruction text for closing
+        const instructionText = document.createElement("div");
+        instructionText.style.cssText = `
+          color: #FFD700;
+          font-family: "Pirata One", sans-serif;
+          font-size: 14px;
+          text-align: center;
+          margin-bottom: 15px;
+        `;
+
+        instructionText.textContent = "Press X or 'Back to menu' button to close";
+        instructionsContainer.appendChild(instructionText);
+
+        // Create back button
+        const backButton = document.createElement("div");
+        backButton.textContent = "BACK TO MENU";
+        backButton.style.cssText = `
+          background: transparent;
+          color: #FFD700;
+          border: 2px solid #FFD700;
+          border-radius: 8px;
+          font-family: "Pirata One", sans-serif;
+          font-size: 16px;
+          font-weight: bold;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: auto;
+          cursor: pointer;
+          user-select: none;
+          touch-action: manipulation;
+          transition: all 0.1s ease;
+          padding: 12px 24px;
+          margin: 0 auto;
+        `;
+
+        // Add events to back button
+        backButton.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          backButton.style.transform = "scale(0.95)";
+        });
+
+        backButton.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          backButton.style.transform = "scale(1)";
+          game.scenes.menu.hideInstructions();
+          // Ensure menu buttons are visible
+          setTimeout(() => {
+            updateMenuOverlay();
+          }, 50);
+        });
+
+        backButton.addEventListener("touchcancel", (e) => {
+          e.preventDefault();
+          backButton.style.transform = "scale(1)";
+        });
+
+        backButton.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          game.scenes.menu.hideInstructions();
+          // Ensure menu buttons are visible
+          setTimeout(() => {
+            updateMenuOverlay();
+          }, 50);
+        });
+
+        instructionsContainer.appendChild(backButton);
+        instructionsOverlayElements.container.appendChild(instructionsContainer);
+
+        // Add click anywhere to close functionality
+        instructionsOverlayElements.container.addEventListener("click", (e) => {
+          if (e.target === instructionsOverlayElements.container) {
+            game.scenes.menu.hideInstructions();
+            // Ensure menu buttons are visible
+            setTimeout(() => {
+              updateMenuOverlay();
+            }, 50);
+          }
+        });
+
+        instructionsOverlayElements.container.style.pointerEvents = "auto";
+      }
+
+      function recreateInstructionsOverlay() {
+        createInstructionsOverlay();
+
+        if (game && game.current_scene && game.current_scene.name === "menu" && game.scenes.menu.showingInstructions) {
+          updateInstructionsOverlay();
+        }
+      }
+
+      // ========== END HTML OVERLAY SYSTEM ==========
 
       // ========== SCORE AND TIMER SYSTEM ==========
       let gameScore = 0;
@@ -2815,22 +3640,25 @@
 
       function showHUD() {
         showHUD_flag = true;
-        document.getElementById("gameHUD").style.display = "block";
+
+        // Show the dynamically created HUD
+        if (hudElements.container) {
+          hudElements.container.style.display = "block";
+        }
 
         // Show control pad for mobile devices when entering game
         updateControlPadVisibility("inGame");
 
         // Add event listener for surrender button (only once)
-        const surrenderBtn = document.getElementById("surrenderBtn");
-        if (surrenderBtn && !surrenderBtn.hasAttribute("data-listener-added")) {
-          surrenderBtn.addEventListener("click", function () {
+        if (hudElements.surrenderButton && !hudElements.surrenderButton.hasAttribute("data-listener-added")) {
+          hudElements.surrenderButton.addEventListener("click", function () {
             // Farcade SDK: Haptic feedback for surrender button
             if (window.FarcadeSDK) {
               window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
             }
             surrenderGame(game);
           });
-          surrenderBtn.setAttribute("data-listener-added", "true");
+          hudElements.surrenderButton.setAttribute("data-listener-added", "true");
         }
 
         // Also show hints during gameplay
@@ -2841,7 +3669,11 @@
 
       function hideHUD() {
         showHUD_flag = false;
-        document.getElementById("gameHUD").style.display = "none";
+
+        // Hide the dynamically created HUD
+        if (hudElements.container) {
+          hudElements.container.style.display = "none";
+        }
 
         // Hide control pad when leaving game
         updateControlPadVisibility("menu");
@@ -2864,25 +3696,27 @@
       }
 
       function updateHUD() {
-        // Update score display
+        // Update score display - use dynamic elements
         const scoreElement = document.getElementById("scoreValue");
         if (scoreElement) {
           scoreElement.textContent = gameScore;
         }
 
-        // Update timer display with color based on time remaining
+        // Update timer display with color based on time remaining - use dynamic elements
         const timerElement = document.getElementById("timerValue");
-        const timerDisplay = document.querySelector(".timer-display");
-        if (timerElement && timerDisplay) {
+        if (timerElement) {
           timerElement.textContent = levelTime;
 
-          // Change color when time is low
-          if (levelTime <= 10) {
-            timerDisplay.style.color = "#ff4444";
-            timerDisplay.style.textShadow = "2px 2px 0px rgba(0, 0, 0, 0.9)"; // Darker shadow for better contrast
-          } else {
-            timerDisplay.style.color = "#ffffff";
-            timerDisplay.style.textShadow = "3px 3px 0px rgba(0, 0, 0, 0.8)";
+          // Change color when time is low - apply to parent element
+          const timerDisplay = timerElement.parentElement;
+          if (timerDisplay) {
+            if (levelTime <= 10) {
+              timerDisplay.style.color = "#ff4444";
+              timerDisplay.style.textShadow = "2px 2px 0px rgba(0, 0, 0, 0.9)"; // Darker shadow for better contrast
+            } else {
+              timerDisplay.style.color = "#ffffff";
+              timerDisplay.style.textShadow = "3px 3px 0px rgba(0, 0, 0, 0.8)";
+            }
           }
         }
       }
@@ -2954,11 +3788,6 @@
 
         // Return to menu (menu will start its own music)
         gameWorld.startScene("menu");
-
-        // Force show menu buttons immediately
-        setTimeout(() => {
-          forceShowMenuButtons();
-        }, 100);
       }
 
       function surrenderGame(gameWorld) {
@@ -2979,11 +3808,6 @@
 
         // Return to menu (menu will start its own music)
         gameWorld.startScene("menu");
-
-        // Force show menu buttons immediately
-        setTimeout(() => {
-          forceShowMenuButtons();
-        }, 100);
       }
       function resetGame() {
         gameScore = 0;
@@ -3090,18 +3914,13 @@
 
       // ========== BACKGROUND MUSIC SYSTEM ==========
       let currentBackgroundMusic = null;
-      let pirateTracks = ["pirate1", "pirate2", "pirate3"];
+      let pirateTracks = ["pirate1"]; // Reduced to single track for faster loading
       let currentTrackIndex = 0;
       let musicVolume = 0.08; // Softer volume level
 
       function stopAllMusic() {
         // Stop menu music
-        if (
-          game &&
-          game.assets &&
-          game.assets.audio &&
-          game.assets.audio.jingle
-        ) {
+        if (game && game.assets && game.assets.audio && game.assets.audio.jingle) {
           game.assets.audio.jingle.audio.pause();
           game.assets.audio.jingle.audio.currentTime = 0;
         }
@@ -3127,10 +3946,7 @@
         currentTrackIndex = Math.floor(Math.random() * pirateTracks.length);
         let trackName = pirateTracks[currentTrackIndex];
 
-        if (
-          game.assets.audio[trackName] &&
-          game.assets.audio[trackName].audio
-        ) {
+        if (game.assets.audio[trackName] && game.assets.audio[trackName].audio) {
           currentBackgroundMusic = game.assets.audio[trackName].audio;
           currentBackgroundMusic.volume = musicVolume;
           currentBackgroundMusic.currentTime = 0;
@@ -3145,7 +3961,7 @@
                 playRandomPirateMusic();
               }, 2000);
             },
-            { once: true }
+            { once: true },
           );
 
           currentBackgroundMusic.play().catch((e) => {
@@ -3172,12 +3988,7 @@
       function playMenuMusic() {
         stopAllMusic();
 
-        if (
-          game &&
-          game.assets &&
-          game.assets.audio &&
-          game.assets.audio.jingle
-        ) {
+        if (game && game.assets && game.assets.audio && game.assets.audio.jingle) {
           game.assets.audio.jingle.audio.volume = musicVolume;
           game.assets.audio.jingle.audio.loop = true;
           game.assets.audio.jingle.audio.currentTime = 0;
@@ -3210,150 +4021,99 @@
       // ========== END SCORE AND TIMER SYSTEM ==========
 
       // ========== MENU BUTTONS MANAGEMENT ==========
-      function forceShowMenuButtons() {
-        console.log("FORCE SHOW: Forcing menu buttons to display");
-
-        const menuButtons = document.getElementById("menuButtons");
-        const menuPlayButton = document.getElementById("menuPlayButton");
-        const menuSelectButton = document.getElementById("menuSelectButton");
-
-        console.log("FORCE SHOW: Elements found:", {
-          menuButtons: !!menuButtons,
-          menuPlayButton: !!menuPlayButton,
-          menuSelectButton: !!menuSelectButton,
-        });
-
-        if (menuButtons) {
-          menuButtons.style.display = "flex";
-          menuButtons.style.visibility = "visible";
-          console.log("FORCE SHOW: Set menuButtons to flex and visible");
-        }
-
-        if (menuPlayButton) {
-          menuPlayButton.style.display = "block";
-          menuPlayButton.style.visibility = "visible";
-          console.log("FORCE SHOW: Set menuPlayButton to block and visible");
-        }
-
-        // Hide level selection button
-        if (menuSelectButton) {
-          menuSelectButton.style.display = "none";
-          menuSelectButton.style.visibility = "hidden";
-          console.log("FORCE SHOW: Hidden menuSelectButton");
-        }
-
-        // Setup button event handlers if they don't exist
-        if (
-          menuPlayButton &&
-          !menuPlayButton.hasAttribute("data-handler-set")
-        ) {
-          menuPlayButton.onclick = () => {
-            console.log("PLAY BUTTON: Clicked");
-            // Play selection sound
-            if (
-              game &&
-              game.assets &&
-              game.assets.audio &&
-              game.assets.audio.selection
-            ) {
-              game.assets.audio.selection.audio.play();
-            }
-
-            // Hide the buttons
-            if (menuButtons) {
-              menuButtons.style.display = "none";
-            }
-
-            // Start game
-            game.current_level = 1;
-            resetGame();
-            game.startScene("inGame");
-          };
-          menuPlayButton.setAttribute("data-handler-set", "true");
-          console.log("FORCE SHOW: Set play button handler");
-        }
-
-        if (
-          menuSelectButton &&
-          !menuSelectButton.hasAttribute("data-handler-set")
-        ) {
-          menuSelectButton.onclick = () => {
-            console.log("SELECT BUTTON: Clicked");
-            // Play selection sound
-            if (
-              game &&
-              game.assets &&
-              game.assets.audio &&
-              game.assets.audio.selection
-            ) {
-              game.assets.audio.selection.audio.play();
-            }
-
-            // Hide the buttons
-            if (menuButtons) {
-              menuButtons.style.display = "none";
-            }
-
-            // Go to level selection
-            game.startScene("levels");
-          };
-          menuSelectButton.setAttribute("data-handler-set", "true");
-          console.log("FORCE SHOW: Set select button handler");
-        }
-      }
+      // Buttons are now drawn directly on canvas - no HTML management needed
       // ========== END MENU BUTTONS MANAGEMENT ==========
 
       // menu scene
       let menu = new Scene("menu");
       menu.keyEvents = function (event) {
-        // Handle Space key to start game
-        if (event.code === "Space" && event.type === "keydown") {
-          // Play selection sound
-          if (
-            game &&
-            game.assets &&
-            game.assets.audio &&
-            game.assets.audio.selection
-          ) {
-            game.assets.audio.selection.audio.play();
+        // If instructions are showing, close them with X (not Space)
+        if (this.showingInstructions && event.code === "KeyX" && event.type === "keydown") {
+          // Don't close immediately if just opened
+          if (this.justOpenedInstructions) {
+            return;
           }
+          this.hideInstructions();
+          return;
+        }
 
-          // Start game
-          game.current_level = 1;
-          resetGame();
-          game.startScene("inGame");
+        // Don't handle other keys if instructions are showing
+        if (this.showingInstructions) return;
+
+        // Check if we're on mobile - if so, only handle Space
+        if (isMobileDevice()) {
+          if (event.code === "Space" && event.type === "keydown") {
+            // No sound for mobile selection - removed audio play
+
+            // Start game
+            game.current_level = 1;
+            resetGame();
+            game.startScene("inGame");
+          }
+          return;
+        }
+
+        // Desktop navigation with arrows
+        if (event.type === "keydown") {
+          if (event.code === "ArrowDown") {
+            if (this.selectedButton < 2) {
+              this.selectedButton++;
+              // No sound for navigation - removed audio play
+              // Update menu overlay to reflect selection change
+              updateMenuOverlay();
+            }
+          } else if (event.code === "ArrowUp") {
+            if (this.selectedButton > 0) {
+              this.selectedButton--;
+              // No sound for navigation - removed audio play
+              // Update menu overlay to reflect selection change
+              updateMenuOverlay();
+            }
+          } else if (event.code === "Space") {
+            // No sound for selection confirmation - removed audio play
+
+            // Execute selected action
+            switch (this.selectedButton) {
+              case 0: // PLAY
+                game.current_level = 1;
+                resetGame();
+                game.startScene("inGame");
+                break;
+              case 1: // SELECT
+                game.startScene("levels");
+                break;
+              case 2: // INSTRUCTIONS
+                this.showInstructions();
+                break;
+            }
+          }
         }
       };
 
-      // Add mouse and touch support for mobile devices
-      menu.mouseEvents = function (event) {
-        // Menu navigation is now handled by HTML buttons
-        // This function is kept for compatibility but does nothing
-        return;
-      };
       menu.init = function () {
         console.log("MENU INIT: Starting menu initialization");
         this.init_once = true;
 
-        // Force show menu buttons using our dedicated function
-        forceShowMenuButtons();
+        // Initialize menu state
+        this.selectedButton = 0; // 0=PLAY, 1=SELECT, 2=INSTRUCTIONS
+        this.showingInstructions = false;
 
         // Play menu music (waves sound)
         playMenuMusic();
 
         // background
+        /* Commented out - pattern image removed
         let background_image = this.world.assets.image.pattern.image;
         this.pattern = this.world.ctx.createPattern(background_image, "repeat");
+        */
+        // Create a simple gradient background instead
+        this.pattern = null;
         this.offset = {
           x: 0,
           y: 0,
         };
         // add cat on
-        this.cat = new Entity(
-          this,
-          -this.world.tile_size,
-          -this.world.tile_size
-        );
+        this.cat = new Entity(this, -this.world.tile_size, -this.world.tile_size);
         let idle_sprite_data = {
           image: "pirate_captain_idle",
           size: {
@@ -3368,75 +4128,110 @@
             y: 32,
           },
         };
-        this.cat.playerSprite = new PlayerSprite(
-          this.cat,
-          idle_sprite_data,
-          walk_sprite_data
-        );
+        this.cat.playerSprite = new PlayerSprite(this.cat, idle_sprite_data, walk_sprite_data);
         this.cat.playerSprite.offset = { x: 0, y: -8 };
+
+        // Force update menu overlay positioning after initialization
+        setTimeout(() => {
+          updateMenuOverlay();
+        }, 100);
       };
       menu.render = function () {
-        // Clear canvas and draw the island background image
+        // Clear canvas and background image now handled by HTML overlay
         this.world.clear("black");
 
+        // Background image now handled by HTML overlay for full screen coverage
+        /*
         // Draw the island background image to fill the canvas
-        let backgroundImage =
-          this.world.assets.image["menu_background_island"].image;
+        let backgroundImage = null;
+        if (this.world.assets.image["menu_background_island"]) {
+          backgroundImage =
+            this.world.assets.image["menu_background_island"].image;
+        }
 
+        if (backgroundImage) {
+          this.ctx.save();
+          this.ctx.imageSmoothingEnabled = true;
+          this.ctx.imageSmoothingQuality = "high";
+
+          // Draw the background image to fit the canvas
+          this.ctx.drawImage(
+            backgroundImage,
+            0,
+            0,
+            backgroundImage.width,
+            backgroundImage.height, // Source
+            0,
+            0,
+            this.world.W,
+            this.world.H // Destination: full canvas
+          );
+
+          this.ctx.restore();
+        } else {
+          // Fallback: draw a simple ocean gradient background
+          let gradient = this.ctx.createLinearGradient(0, 0, 0, this.world.H);
+          gradient.addColorStop(0, "#1e3a8a"); // Deep blue
+          gradient.addColorStop(0.5, "#2563eb"); // Medium blue
+          gradient.addColorStop(1, "#1e40af"); // Darker blue
+          this.ctx.fillStyle = gradient;
+          this.ctx.fillRect(0, 0, this.world.W, this.world.H);
+        }
+        */
+
+        // Draw the title "The Open-Sea" - now handled by HTML overlay
+        /*
         this.ctx.save();
-        this.ctx.imageSmoothingEnabled = true;
-        this.ctx.imageSmoothingQuality = "high";
-
-        // Draw the background image to fit the canvas
-        this.ctx.drawImage(
-          backgroundImage,
-          0,
-          0,
-          backgroundImage.width,
-          backgroundImage.height, // Source
-          0,
-          0,
-          this.world.W,
-          this.world.H // Destination: full canvas
-        );
-
-        this.ctx.restore();
-
-        // Draw instruction box at bottom with semi-transparent background
-        let boxHeight = 40;
-        let boxY = this.world.H - boxHeight;
-        let centerX = this.world.W / 2;
-
-        // Draw semi-transparent black box (less opaque)
-        this.ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-        this.ctx.fillRect(0, boxY, this.world.W, boxHeight);
-
-        // Draw subtle border on top
-        this.ctx.strokeStyle = "rgba(255, 215, 0, 0.3)"; // Gold border
-        this.ctx.lineWidth = 1;
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, boxY);
-        this.ctx.lineTo(this.world.W, boxY);
-        this.ctx.stroke();
-
-        // Draw instruction text
-        this.ctx.font = "12px 'Pirata One', sans-serif";
-        this.ctx.fillStyle = "#FFD700"; // Gold text
-        this.ctx.strokeStyle = "#000000";
-        this.ctx.lineWidth = 1;
+        this.ctx.font = "36px 'Pirata One', sans-serif";
         this.ctx.textAlign = "center";
         this.ctx.textBaseline = "middle";
 
-        let instructionText = 'Use arrows to move and "space" to start';
-        let textY = boxY + boxHeight / 2;
+        let titleX = this.world.W / 2;
+        let titleY = 40; // Moved closer to top
 
-        // Draw text with stroke for better readability
-        this.ctx.strokeText(instructionText, centerX, textY);
-        this.ctx.fillText(instructionText, centerX, textY);
+        // Draw black outline (5 pixels thick)
+        this.ctx.strokeStyle = "#000000";
+        this.ctx.lineWidth = 10; // 5 pixels on each side = 10 total width
+        this.ctx.strokeText("The Open-Sea", titleX, titleY);
+
+        // Draw white text
+        this.ctx.fillStyle = "#FFFFFF";
+        this.ctx.fillText("The Open-Sea", titleX, titleY);
+
+        this.ctx.restore();
+        */
+
+        // Instructions now handled by HTML overlay - but still call the function for compatibility
+        this.drawInstructions();
       };
-      menu.displaySelection = function () {
-        // No canvas buttons needed - using HTML buttons instead
-        return;
+
+      menu.showInstructions = function () {
+        this.showingInstructions = true;
+        this.instructionsStartTime = Date.now();
+
+        // Prevent immediate closing by setting a small delay flag
+        this.justOpenedInstructions = true;
+        setTimeout(() => {
+          this.justOpenedInstructions = false;
+        }, 100); // 100ms delay to prevent immediate closing
+
+        // Update the instructions overlay
+        updateInstructionsOverlay();
+      };
+
+      menu.hideInstructions = function () {
+        this.showingInstructions = false;
+        // Update the instructions overlay to hide it
+        updateInstructionsOverlay();
+        // Ensure menu buttons are visible
+        setTimeout(() => {
+          updateMenuOverlay();
+        }, 50);
+      };
+
+      menu.drawInstructions = function () {
+        // Instructions now handled by HTML overlay - no canvas rendering needed
+        let modalX = 20;
       };
       menu.animatedBackground = function () {
         // Smooth ocean-like movement simulation
@@ -3459,167 +4254,140 @@
         let ctx = this.world.ctx;
         ctx.save();
         ctx.translate(this.offset.x, this.offset.y);
-        ctx.fillStyle = this.pattern;
-        ctx.fillRect(
-          -this.offset.x,
-          -this.offset.y,
-          this.world.W,
-          this.world.H
-        );
+
+        // Use a simple gradient background instead of pattern
+        if (this.pattern) {
+          ctx.fillStyle = this.pattern;
+        } else {
+          // Create a simple ocean-like gradient
+          let gradient = ctx.createLinearGradient(0, 0, 0, this.world.H);
+          gradient.addColorStop(0, "#1e3a8a"); // Deep blue
+          gradient.addColorStop(0.5, "#2563eb"); // Medium blue
+          gradient.addColorStop(1, "#1e40af"); // Darker blue
+          ctx.fillStyle = gradient;
+        }
+
+        ctx.fillRect(-this.offset.x, -this.offset.y, this.world.W, this.world.H);
         ctx.restore();
       };
       let levels = new Scene("levels");
       levels.keyEvents = function (event) {
-        // Only allow Arrow Keys and Space
-        if (
-          event.code !== "ArrowUp" &&
-          event.code !== "ArrowDown" &&
-          event.code !== "ArrowLeft" &&
-          event.code !== "ArrowRight" &&
-          event.code !== "Space"
-        ) {
-          return; // Ignore other keys
-        }
-
-        // Remove KeyE - only allow Arrow Keys and Space
-        if (
-          this.world.keys.ArrowDown &&
-          this.selection + 5 < this.world.mapsMax
-        ) {
-          this.world.assets.audio.selection.audio.play();
-          this.selection += 5;
-        }
-        if (this.world.keys.ArrowUp && this.selection - 5 >= 0) {
-          this.world.assets.audio.selection.audio.play();
-          this.selection -= 5;
-        }
-        if (
-          this.world.keys.ArrowRight &&
-          this.selection + 1 < this.world.mapsMax
-        ) {
-          this.world.assets.audio.selection.audio.play();
-          this.selection += 1;
-        }
-        if (this.world.keys.ArrowLeft && this.selection - 1 >= 0) {
-          this.world.assets.audio.selection.audio.play();
-          this.selection -= 1;
-        }
-        if (this.world.keys.Space) {
-          this.world.assets.audio.selection.audio.play();
-          this.world.current_level = this.selection + 1;
-          this.world.startScene("inGame");
-        }
-      };
-      levels.init = function () {
-        this.init_once = true;
-        this.selection = 0;
-        this.scale = 0;
-
-        // Ensure pirate music is playing, but don't restart if already playing
-        ensurePirateMusicPlaying();
-      };
-      levels.render = function () {
-        this.world.clear("black");
-        // animate selection
-        this.scale += 0.1;
-        if (this.scale > 1 / Math.sin(0.2)) {
-          this.scale = -1;
-        }
-        let offset = Math.sin(this.scale) * 2;
-        // display box
-        this.ctx.fillStyle = "#82769e";
-        this.world.drawBox(
-          "box",
-          16,
-          16,
-          this.world.W - 32,
-          this.world.H - 46 - 32
-        );
-        // No need for bitmap fonts - using CSS fonts
-        let show = Math.min(this.world.mapsMax, 20);
-        for (let i = 0; i < show; i++) {
-          let level_id = i + 20 * Math.floor(this.selection / 20);
-          let position_x = 32 + Math.floor(i % 5) * 40,
-            position_y = 32 + Math.floor(i / 5) * 40;
-          if (level_id == this.selection) {
-            // Selected level with glowing box
-            this.world.drawBox(
-              "selection",
-              position_x - offset / 2,
-              position_y - offset / 2,
-              24 + offset,
-              24 + offset
-            );
-          } else {
-            // Unselected level with flat frame
-            this.world.drawBox("flat_frame", position_x, position_y, 24, 24);
-          }
-          // Use pirate font for level numbers
-          this.world.ctx.font = "16px 'Pirata One', sans-serif";
-          this.world.ctx.textAlign = "center";
-          this.world.ctx.lineWidth = 1;
-          this.world.ctx.fillStyle = "#FFD700";
-          this.world.ctx.strokeStyle = "#8B4513";
-
-          let levelText = (level_id + 1).toString();
-          this.world.ctx.strokeText(
-            levelText,
-            position_x + 13,
-            position_y + 16
-          );
-          this.world.ctx.fillText(levelText, position_x + 13, position_y + 16);
-        }
-        // notice with pirate fonts for level selection
-        this.world.ctx.fillStyle = "rgba(0,0,0,0.6)";
-        this.world.ctx.fillRect(0, this.world.H - 60, this.world.W, 50); // Increased height from 33 to 50 and adjusted Y position
-
-        // Use pirate font for level selection instructions
-        this.world.ctx.font = "18px 'Pirata One', sans-serif";
-        this.world.ctx.fillStyle = "#FFD700";
-        this.world.ctx.strokeStyle = "#8B4513";
-        this.world.ctx.lineWidth = 2;
-        this.world.ctx.textAlign = "center";
-
-        // Arrow keys instruction
-        this.world.ctx.strokeText(
-          "Arrow keys to select",
-          this.world.W / 2,
-          this.world.H - 40
-        );
-        this.world.ctx.fillText(
-          "Arrow keys to select",
-          this.world.W / 2,
-          this.world.H - 40
-        );
-
-        // Space to confirm instruction
-        this.world.ctx.strokeText(
-          "[Space] to Confirm",
-          this.world.W / 2,
-          this.world.H - 20
-        );
-        this.world.ctx.fillText(
-          "[Space] to Confirm",
-          this.world.W / 2,
-          this.world.H - 20
-        );
-      };
-      let inGame = new Scene("inGame");
-      inGame.keyEvents = function (event) {
-        // Only allow Arrow Keys, Space, and S for surrender
+        // Only allow Arrow Keys, Space, and X
         if (
           event.code !== "ArrowUp" &&
           event.code !== "ArrowDown" &&
           event.code !== "ArrowLeft" &&
           event.code !== "ArrowRight" &&
           event.code !== "Space" &&
-          event.code !== "KeyS"
+          event.code !== "KeyX"
         ) {
           return; // Ignore other keys
         }
 
-        // Handle surrender with S key
-        if (event.code === "KeyS" && event.type === "keydown") {
+        // Handle X key to go back to menu (works on both mobile and desktop)
+        if (event.code === "KeyX" && event.type === "keydown") {
+          // No sound when going back - removed audio play
+          this.world.startScene("menu");
+          // Ensure menu buttons are visible
+          setTimeout(() => {
+            updateMenuOverlay();
+          }, 50);
+          return;
+        }
+
+        // On mobile devices, ignore navigation keys (only allow X and touch/click)
+        if (isMobileDevice()) {
+          return; // Mobile users must tap on levels
+        }
+
+        // Desktop navigation with arrow keys and space (only on keydown)
+        if (event.type === "keydown") {
+          if (event.code === "ArrowDown") {
+            if (this.selection + 5 < this.world.mapsMax) {
+              // No sound for navigation - removed audio play
+              this.selection += 5;
+              // Update levels overlay to reflect selection change
+              updateLevelsOverlay();
+            }
+          } else if (event.code === "ArrowUp") {
+            if (this.selection - 5 >= 0) {
+              // No sound for navigation - removed audio play
+              this.selection -= 5;
+              // Update levels overlay to reflect selection change
+              updateLevelsOverlay();
+            }
+          } else if (event.code === "ArrowRight") {
+            if (this.selection + 1 < this.world.mapsMax) {
+              // No sound for navigation - removed audio play
+              this.selection += 1;
+              // Update levels overlay to reflect selection change
+              updateLevelsOverlay();
+            }
+          } else if (event.code === "ArrowLeft") {
+            if (this.selection - 1 >= 0) {
+              // No sound for navigation - removed audio play
+              this.selection -= 1;
+              // Update levels overlay to reflect selection change
+              updateLevelsOverlay();
+            }
+          } else if (event.code === "Space") {
+            // No sound for level selection - removed audio play
+            this.world.current_level = this.selection + 1;
+
+            // Start pirate music only when level is selected and game begins
+            ensurePirateMusicPlaying();
+
+            this.world.startScene("inGame");
+          }
+        }
+      };
+
+      levels.init = function () {
+        this.init_once = true;
+        this.selection = 0;
+        this.scale = 0;
+
+        // Don't play pirate music in level selection - keep only menu music (waves)
+        // The pirate music will start when a level is actually selected and game begins
+
+        // Force update levels overlay positioning after initialization
+        setTimeout(() => {
+          updateLevelsOverlay();
+        }, 100);
+      };
+      levels.render = function () {
+        // Clear canvas and draw gradient background like instructions modal
+        this.world.clear("black");
+
+        // Draw same gradient background as instructions modal
+        let gradient = this.ctx.createLinearGradient(0, 0, 0, this.world.H);
+        gradient.addColorStop(0, "#1a1a2e");
+        gradient.addColorStop(1, "#16213e");
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.world.W, this.world.H);
+
+        // Level selection now handled by HTML overlay - no canvas rendering needed
+      };
+      let inGame = new Scene("inGame");
+      inGame.keyEvents = function (event) {
+        // Only allow Arrow Keys, WASD, Space, and X for surrender
+        if (
+          event.code !== "ArrowUp" &&
+          event.code !== "ArrowDown" &&
+          event.code !== "ArrowLeft" &&
+          event.code !== "ArrowRight" &&
+          event.code !== "KeyW" &&
+          event.code !== "KeyA" &&
+          event.code !== "KeyS" &&
+          event.code !== "KeyD" &&
+          event.code !== "Space" &&
+          event.code !== "KeyX"
+        ) {
+          return; // Ignore other keys
+        }
+
+        // Handle surrender with X key (for consistency)
+        if (event.code === "KeyX" && event.type === "keydown") {
           // Farcade SDK: Haptic feedback for surrender key
           if (window.FarcadeSDK) {
             window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
@@ -3628,18 +4396,12 @@
           return;
         }
 
-        // Remove E and R key handling - only allow Arrow Keys and Space
+        // Remove E and R key handling - only allow Arrow Keys, WASD, and Space
       };
       inGame.init = function () {
         this.won = false;
         this.userInput = true;
         this.world.initMap("map_" + this.world.current_level);
-
-        // Hide HTML menu buttons when entering game
-        const menuButtons = document.getElementById("menuButtons");
-        if (menuButtons) {
-          menuButtons.style.display = "none";
-        }
 
         // Ensure pirate music is playing, but don't restart if already playing
         ensurePirateMusicPlaying();
@@ -3684,12 +4446,7 @@
           update: function () {
             let time = new Date() - this.start_time;
             if (time < this.duration) {
-              this.value = Util.easeInOutQuad(
-                time,
-                this.from,
-                this.to - this.from,
-                this.duration
-              );
+              this.value = Util.easeInOutQuad(time, this.from, this.to - this.from, this.duration);
             } else {
               this.active = false;
               this.scene.userInput = true;
@@ -3701,26 +4458,12 @@
           render: function () {
             this.scene.ctx.fillStyle = "black";
             this.scene.ctx.fillRect(0, 0, this.scene.world.W, this.value);
-            this.scene.ctx.fillRect(
-              0,
-              this.scene.world.H,
-              this.scene.world.W,
-              -this.value
-            );
+            this.scene.ctx.fillRect(0, this.scene.world.H, this.scene.world.W, -this.value);
             this.scene.ctx.fillRect(0, 0, this.value, this.scene.world.H);
-            this.scene.ctx.fillRect(
-              this.scene.world.W,
-              0,
-              -this.value,
-              this.scene.world.H
-            );
+            this.scene.ctx.fillRect(this.scene.world.W, 0, -this.value, this.scene.world.H);
           },
         };
-        this.transition.start(
-          Math.max(this.world.W / 2, this.world.H / 2),
-          0,
-          spawn_cat
-        );
+        this.transition.start(Math.max(this.world.W / 2, this.world.H / 2), 0, spawn_cat);
       };
       inGame.addCat = function (x, y) {
         let cat = new Cat(this, x, y);
@@ -3738,11 +4481,7 @@
             y: 32,
           },
         };
-        cat.playerSprite = new PlayerSprite(
-          cat,
-          idle_sprite_data,
-          walk_sprite_data
-        );
+        cat.playerSprite = new PlayerSprite(cat, idle_sprite_data, walk_sprite_data);
         cat.playerSprite.offset = { x: 0, y: -8 };
         let spawn_data = {
           image: "spawn_effect",
@@ -3769,7 +4508,7 @@
           this.ctx.drawImage(
             this.world.assets.image["shadow"].image,
             this.cats[i].body.position.x,
-            this.cats[i].body.position.y + 2
+            this.cats[i].body.position.y + 2,
           );
           this.cats[i].playerSprite.display();
           this.cats[i].translation();
@@ -3791,12 +4530,7 @@
       // Global function to render scaled sprite text on external canvas
       function renderScaledTextOnCanvas(ctx, text, centerX, y, scale, colorID) {
         // Wait for game to be fully loaded
-        if (
-          !game ||
-          !game.fonts ||
-          !game.currentFont ||
-          !game.fonts[game.currentFont]
-        ) {
+        if (!game || !game.fonts || !game.currentFont || !game.fonts[game.currentFont]) {
           // Fallback: render with browser font temporarily
           ctx.font = "bold " + 16 * scale + "px monospace";
           ctx.fillStyle = colorID === 1 ? "#ff4444" : "#ffffff";
@@ -3849,7 +4583,7 @@
                 posX,
                 y - (size_y * scale) / 2,
                 size_x * scale,
-                size_y * scale
+                size_y * scale,
               );
             } catch (e) {
               // Fallback if drawImage fails
@@ -3873,6 +4607,8 @@
 
       inGame.control = function () {
         if (this.userInput == false) return false;
+
+        // Arrow keys
         if (this.world.keys.ArrowUp) {
           this.moveCats(0, -1);
         }
@@ -3883,6 +4619,20 @@
           this.moveCats(-1, 0);
         }
         if (this.world.keys.ArrowRight) {
+          this.moveCats(1, 0);
+        }
+
+        // WASD keys
+        if (this.world.keys.KeyW) {
+          this.moveCats(0, -1);
+        }
+        if (this.world.keys.KeyS) {
+          this.moveCats(0, 1);
+        }
+        if (this.world.keys.KeyA) {
+          this.moveCats(-1, 0);
+        }
+        if (this.world.keys.KeyD) {
           this.moveCats(1, 0);
         }
       };
@@ -3946,7 +4696,7 @@
                 if (animatedTile.id == "17") {
                   // coin tile id
                   animatedTile.positions = animatedTile.positions.filter(
-                    (pos) => !(pos.x === cat.target.x && pos.y === cat.target.y)
+                    (pos) => !(pos.x === cat.target.x && pos.y === cat.target.y),
                   );
                 }
               });
@@ -3962,10 +4712,7 @@
             }
 
             // Play coin collection sound
-            if (
-              this.world.assets.audio.coin_collect &&
-              this.world.assets.audio.coin_collect.audio
-            ) {
+            if (this.world.assets.audio.coin_collect && this.world.assets.audio.coin_collect.audio) {
               try {
                 this.world.assets.audio.coin_collect.audio.currentTime = 0;
                 this.world.assets.audio.coin_collect.audio.play().catch((e) => {
@@ -4000,89 +4747,58 @@
 
           // Return to menu
           this.world.startScene("menu");
-
-          // Force show menu buttons immediately
-          setTimeout(() => {
-            forceShowMenuButtons();
-          }, 100);
           return false;
         }
         let win = this.cats.every((cat) => {
           let tile = this.world.getTile(3, cat.target.x, cat.target.y);
           return tile.name == "exit";
         });
-        if (
-          win === true &&
-          this.cats.length >= this.world.findTile(3, 8).length &&
-          !this.won
-        ) {
+        if (win === true && this.cats.length >= this.world.findTile(3, 8).length && !this.won) {
           this.won = true;
 
-          // Play completion sound with error handling
-          if (
-            this.world.assets.audio.selection &&
-            this.world.assets.audio.selection.audio
-          ) {
+          // Play exit sound when reaching the portal (not selection sound)
+          if (this.world.assets.audio.exit && this.world.assets.audio.exit.audio) {
             try {
-              this.world.assets.audio.selection.audio.currentTime = 0;
-              this.world.assets.audio.selection.audio.play().catch((e) => {
-                console.log("Could not play selection audio:", e);
+              this.world.assets.audio.exit.audio.currentTime = 0;
+              this.world.assets.audio.exit.audio.play().catch((e) => {
+                console.log("Could not play exit audio:", e);
               });
             } catch (error) {
-              console.log("Error playing completion sound:", error);
+              console.log("Error playing exit sound:", error);
             }
           } else {
-            console.log("Selection audio not available");
+            console.log("Exit audio not available");
           }
 
           // Level completed - calculate and add score
           levelCompleted(this.world);
 
-          if (
-            this.world.maps["map_" + (this.world.current_level + 1)] !==
-            undefined
-          ) {
-            this.transition.start(
-              0,
-              Math.max(this.world.W / 2, this.world.H / 2),
-              () => {
-                this.world.current_level += 1;
-                this.world.startScene("inGame");
-              }
-            );
+          if (this.world.maps["map_" + (this.world.current_level + 1)] !== undefined) {
+            this.transition.start(0, Math.max(this.world.W / 2, this.world.H / 2), () => {
+              this.world.current_level += 1;
+              this.world.startScene("inGame");
+            });
           } else {
             // All levels completed - capture final score and reset game
-            this.transition.start(
-              0,
-              Math.max(this.world.W / 2, this.world.H / 2),
-              () => {
-                hideHUD();
-                stopAllMusic(); // Stop background music
-                console.log(
-                  "GAME COMPLETED - All levels finished - Final Score:",
-                  gameScore
-                );
+            this.transition.start(0, Math.max(this.world.W / 2, this.world.H / 2), () => {
+              hideHUD();
+              stopAllMusic(); // Stop background music
+              console.log("GAME COMPLETED - All levels finished - Final Score:", gameScore);
 
-                // Farcade SDK: Report game completion with final score
-                if (window.FarcadeSDK) {
-                  window.FarcadeSDK.singlePlayer.actions.gameOver({
-                    score: gameScore,
-                  });
-                }
-
-                // Reset game to level 1 for next play
-                this.world.current_level = 1;
-                resetGame();
-
-                // Return to menu (menu will start its own music)
-                this.world.startScene("menu");
-
-                // Force show menu buttons immediately
-                setTimeout(() => {
-                  forceShowMenuButtons();
-                }, 100);
+              // Farcade SDK: Report game completion with final score
+              if (window.FarcadeSDK) {
+                window.FarcadeSDK.singlePlayer.actions.gameOver({
+                  score: gameScore,
+                });
               }
-            );
+
+              // Reset game to level 1 for next play
+              this.world.current_level = 1;
+              resetGame();
+
+              // Return to menu (menu will start its own music)
+              this.world.startScene("menu");
+            });
           }
         }
       };
@@ -4104,10 +4820,7 @@
               this.callback = undefined;
             }
           }
-          if (
-            this.sprite.current_frame + 1 ===
-            this.sprite.animations[this.sprite.current_animation].length
-          ) {
+          if (this.sprite.current_frame + 1 === this.sprite.animations[this.sprite.current_animation].length) {
             this.scene.effects.splice(this.scene.effects.indexOf(this), 1);
           }
           this.sprite.animate("full");
@@ -4141,13 +4854,13 @@
                   time,
                   this.transition.start_pos.x,
                   this.transition.target.x - this.transition.start_pos.x,
-                  this.transition.duration
+                  this.transition.duration,
                 ),
                 y = this.transition.type(
                   time,
                   this.transition.start_pos.y,
                   this.transition.target.y - this.transition.start_pos.y,
-                  this.transition.duration
+                  this.transition.duration,
                 );
               this.body.position = new Vector(x, y);
             } else {
@@ -4167,48 +4880,34 @@
                     y: 32,
                   },
                 };
-                let spawn_effect = new Effect(
-                  this.scene,
-                  spawn_data,
-                  this.target.x,
-                  this.target.y - 1,
-                  () => {
-                    this.scene.cats.splice(this.scene.cats.indexOf(this), 1);
-                    this.world.assets.audio.splash.audio.play();
+                let spawn_effect = new Effect(this.scene, spawn_data, this.target.x, this.target.y - 1, () => {
+                  this.scene.cats.splice(this.scene.cats.indexOf(this), 1);
+                  this.world.assets.audio.splash.audio.play();
 
-                    // Farcade SDK: Haptic feedback for falling in water
-                    if (window.FarcadeSDK) {
-                      window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
-                    }
-
-                    // Game Over immediately when ANY pirate falls into water
-                    hideHUD();
-                    stopAllMusic(); // Stop background music
-                    console.log(
-                      "GAME OVER - Pirate fell into water - Final Score:",
-                      gameScore
-                    );
-
-                    // Farcade SDK: Report game over with score
-                    if (window.FarcadeSDK) {
-                      window.FarcadeSDK.singlePlayer.actions.gameOver({
-                        score: gameScore,
-                      });
-                    }
-
-                    // Reset game to level 1 for next play
-                    this.world.current_level = 1;
-                    resetGame();
-
-                    // Return to menu (menu will start its own music)
-                    this.world.startScene("menu");
-
-                    // Force show menu buttons immediately
-                    setTimeout(() => {
-                      forceShowMenuButtons();
-                    }, 100);
+                  // Farcade SDK: Haptic feedback for falling in water
+                  if (window.FarcadeSDK) {
+                    window.FarcadeSDK.singlePlayer.actions.hapticFeedback();
                   }
-                );
+
+                  // Game Over immediately when ANY pirate falls into water
+                  hideHUD();
+                  stopAllMusic(); // Stop background music
+                  console.log("GAME OVER - Pirate fell into water - Final Score:", gameScore);
+
+                  // Farcade SDK: Report game over with score
+                  if (window.FarcadeSDK) {
+                    window.FarcadeSDK.singlePlayer.actions.gameOver({
+                      score: gameScore,
+                    });
+                  }
+
+                  // Reset game to level 1 for next play
+                  this.world.current_level = 1;
+                  resetGame();
+
+                  // Return to menu (menu will start its own music)
+                  this.world.startScene("menu");
+                });
                 spawn_effect.sprite.offset.y = 0;
                 spawn_effect.trigger = 2;
                 this.scene.effects.push(spawn_effect);
@@ -4219,11 +4918,7 @@
                 this.applyMove();
               } else {
                 // check arrows
-                let current_tile = this.world.getTile(
-                  3,
-                  this.target.x,
-                  this.target.y
-                );
+                let current_tile = this.world.getTile(3, this.target.x, this.target.y);
                 switch (current_tile.name) {
                   case "arrowRight":
                     this.move(1, 0);
@@ -4263,11 +4958,7 @@
           let layers = this.world.terrain.layers;
           let future_tile = layers.map((layer) => {
             let index = layers.indexOf(layer);
-            return this.world.getTile(
-              index,
-              future_position.x,
-              future_position.y
-            );
+            return this.world.getTile(index, future_position.x, future_position.y);
           });
           let collision = future_tile.every((tile) => {
             if (tile == false) {
@@ -4294,18 +4985,11 @@
                 y: 32,
               },
             };
-            let dust_effect = new Effect(
-              this.scene,
-              dust_data,
-              this.target.x,
-              this.target.y
-            );
+            let dust_effect = new Effect(this.scene, dust_data, this.target.x, this.target.y);
             this.scene.effects.push(dust_effect);
             this.world.assets.audio.eboulement.audio.play();
 
-            this.world.terrain.layers[3].geometry[future_position.y][
-              future_position.x
-            ] = 10;
+            this.world.terrain.layers[3].geometry[future_position.y][future_position.x] = 10;
             // cache the map
             this.world.terrainCache(this.world.terrain.layers[3]);
             return false;
@@ -4324,17 +5008,11 @@
         }
         applyMove() {
           // prevent cat to move if his target equal his actual position :V
-          if (
-            this.old_position.x === this.target.x &&
-            this.old_position.y === this.target.y
-          ) {
+          if (this.old_position.x === this.target.x && this.old_position.y === this.target.y) {
             this.canBeControlled = true;
             return false;
           }
-          this.lastDirection = new Vector(
-            this.target.x - this.old_position.x,
-            this.target.y - this.old_position.y
-          );
+          this.lastDirection = new Vector(this.target.x - this.old_position.x, this.target.y - this.old_position.y);
           this.shouldMove = false;
           this.transition.start_pos = this.old_position.copy();
           this.transition.start_pos.mult(this.world.tile_size);
@@ -4348,10 +5026,7 @@
           let result = false;
           for (let i = 0; i < others.length; i++) {
             if (this === others[i]) continue;
-            if (
-              others[i].target.x === this.target.x &&
-              others[i].target.y === this.target.y
-            ) {
+            if (others[i].target.x === this.target.x && others[i].target.y === this.target.y) {
               result = true;
               break;
             }
@@ -4364,6 +5039,11 @@
       let game = new Diorama(parameters);
       // global variables
       game.current_level = 1;
+
+      // Create dynamic UI elements
+      createGameHUD();
+      createControlPad();
+
       // Add the different scenes here
       // the addScene function link the scene with the world (game)
       game.addScene(menu);
@@ -4379,9 +5059,24 @@
 
       // Update control pad visibility on window resize (for device rotation)
       window.addEventListener("resize", function () {
-        const currentScene =
-          game && game.current_scene ? game.current_scene.name : "menu";
-        updateControlPadVisibility(currentScene);
+        // Add a small delay to ensure the resize is complete
+        setTimeout(() => {
+          const currentScene = game && game.current_scene ? game.current_scene.name : "menu";
+
+          // Recreate control pad with new dimensions for mobile devices
+          recreateControlPad();
+
+          // Recreate overlays with new dimensions for mobile devices
+          recreateMenuOverlay();
+          recreateLevelsOverlay();
+          recreateInstructionsOverlay();
+
+          // Update visibility and positions based on current scene
+          updateControlPadVisibility(currentScene);
+          updateMenuOverlay();
+          updateLevelsOverlay();
+          updateInstructionsOverlay();
+        }, 100);
       });
 
       // Farcade SDK: Game is ready to play
@@ -4399,19 +5094,6 @@
           console.log("PLAY AGAIN: About to start menu scene");
           game.startScene("menu");
           console.log("PLAY AGAIN: Menu scene started");
-
-          // Force show menu buttons with multiple attempts
-          setTimeout(() => {
-            forceShowMenuButtons();
-          }, 50);
-
-          setTimeout(() => {
-            forceShowMenuButtons();
-          }, 200);
-
-          setTimeout(() => {
-            forceShowMenuButtons();
-          }, 500);
         });
 
         // Handle mute/unmute toggle
@@ -4425,10 +5107,7 @@
             // Resume appropriate music based on current scene
             if (game.current_scene && game.current_scene.name === "menu") {
               ensureMenuMusicPlaying();
-            } else if (
-              game.current_scene &&
-              game.current_scene.name === "inGame"
-            ) {
+            } else if (game.current_scene && game.current_scene.name === "inGame") {
               ensurePirateMusicPlaying();
             }
           }
@@ -4438,6 +5117,11 @@
       // Making the game full screen and with a softer audio volume by default
       game.soundLevel(0.1);
       game.fullScreen();
+
+      // Initialize overlay systems
+      createMenuOverlay();
+      createLevelsOverlay();
+      createInstructionsOverlay();
     </script>
   </body>
 </html>
